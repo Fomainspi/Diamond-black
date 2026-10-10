@@ -1,0 +1,65 @@
+# Git and repository metadata
+.git
+.github
+.gitignore
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+secrets/
+private/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Dependencies (install inside image)
+node_modules/
+vendor/
+
+# Build output and local caches
+dist/
+build/
+out/
+.next/
+coverage/
+.cache/
+.turbo/
+.tmp/
+temp/
+
+# Logs, test output and local data
+*.log
+logs/
+coverage/
+test-results/
+playwright-report/
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
+backups/
+database-dumps/
+dumps/
+
+# User content and uploads
+uploads/
+storage/private/
+public/uploads/
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Infrastructure state
+.terraform/
+*.tfstate
+*.tfstate.*
+cdk.out/
