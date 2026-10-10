@@ -153,3 +153,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .event-details { flex-direction: column; align-items: flex-start; }
   .venue-image img { min-height: 280px; }
 }
+
+.page-hero { padding: 120px 0 70px; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 80% 20%, rgba(199,164,90,.14), transparent 42%), #0b0b0a; }
+.page-hero h1 { margin: 12px 0 0; font-size: clamp(2.8rem, 7vw, 5.8rem); line-height: 1; letter-spacing: -.05em; }
