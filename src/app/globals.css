@@ -156,3 +156,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .page-hero { padding: 120px 0 70px; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 80% 20%, rgba(199,164,90,.14), transparent 42%), #0b0b0a; }
 .page-hero h1 { margin: 12px 0 0; font-size: clamp(2.8rem, 7vw, 5.8rem); line-height: 1; letter-spacing: -.05em; }
+
+.event-actions { margin-top: 24px; }
+.registration-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.registration-form { display: grid; gap: 18px; padding: 32px; border: 1px solid var(--line); background: rgba(255,255,255,.02); }
+.registration-form label { display: grid; gap: 8px; font-size: .82rem; font-weight: 600; letter-spacing: .04em; }
+.registration-form input, .registration-form select { width: 100%; box-sizing: border-box; padding: 13px 14px; border: 1px solid var(--line); background: #0c0c0b; color: inherit; font: inherit; }
+.registration-form input:focus, .registration-form select:focus { outline: 1px solid rgba(199,164,90,.8); }
+.registration-form .checkbox-label { display: flex; grid-template-columns: none; align-items: center; gap: 10px; font-weight: 400; }
+.registration-form .checkbox-label input { width: auto; }
+@media (max-width: 800px) { .registration-layout { grid-template-columns: 1fr; gap: 36px; } }
