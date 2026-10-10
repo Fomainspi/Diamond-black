@@ -19,8 +19,7 @@ export default function HomePage() {
       <header className="site-header">
         <div className="container header-inner">
           <a className="brand" href="#home" aria-label="Diamond Black Corporation home">
-            <span className="brand-mark"><span>◆</span></span>
-            <span><span className="brand-name">DIAMOND BLACK</span><span className="brand-subtitle">CORPORATION</span></span>
+            <img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" />
           </a>
           <nav className="nav" aria-label="Main navigation">
             <a href="#about">About</a><a href="#services">Services</a><a href="#events">Events</a><a href="#news">News</a><a href="#newsletter">Newsletter</a><a href="#contact">Contact</a>
@@ -30,23 +29,30 @@ export default function HomePage() {
 
       <main id="home">
         <section className="hero">
+          <div className="hero-media" aria-hidden="true">
+            <img src="/images/diamond-black-primary.jpg" alt="" />
+          </div>
+          <div className="hero-overlay" />
           <div className="container hero-content">
-            <span className="eyebrow">Connections • Innovation • Growth</span>
+            <span className="eyebrow">People • Ideas • Opportunities</span>
             <h1>BUILD.<br /><span>INNOVATE.</span><br />EXPAND.</h1>
             <p>We bring people, ideas, and opportunities together to support entrepreneurship, business development, and lasting connections.</p>
             <div className="actions">
-              <a className="button" href="#services">Explore Our Services</a>
+              <a className="button" href="#events">Discover Diamond Black</a>
               <a className="button button-secondary" href="#contact">Connect With Us</a>
             </div>
           </div>
         </section>
 
-        <section className="section" id="about">
-          <div className="container">
-            <div className="section-heading">
+        <section className="section brand-intro" id="about">
+          <div className="container brand-intro-grid">
+            <div>
               <span className="eyebrow">Who We Are</span>
               <h2>Ambition deserves a place to connect.</h2>
               <p className="lead">Diamond Black Corporation promotes entrepreneurship, innovation, talent, and business development through strategic networking, digital marketing, audiovisual production, and corporate events.</p>
+            </div>
+            <div className="seal-wrap">
+              <img src="/images/diamond-black-seal.jpg" alt="Diamond Black emblem" />
             </div>
           </div>
         </section>
@@ -60,20 +66,23 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="section" id="events">
-          <div className="container featured-event">
-            <div>
-              <span className="eyebrow">Featured Event</span>
-              <h2>Where new connections begin.</h2>
-              <p className="lead">A gathering built around people, ideas, and new business opportunities.</p>
+        <section className="section event-showcase" id="events">
+          <div className="container">
+            <div className="section-heading"><span className="eyebrow">Featured Event</span><h2>100 People. One Night.</h2><p className="lead">New connections. New business.</p></div>
+            <div className="event-art">
+              <img src="/images/100-people-one-night.jpg" alt="100 People One Night — Diamond Black event artwork" />
             </div>
-            <article className="event-panel">
-              <span className="eyebrow">Diamond Black Presents</span>
-              <h3>100 People<br />One Night</h3>
-              <p className="lead">New Connections. New Business.</p>
-              <p className="event-meta">Saturday, 14 November 2026 · Manila, Philippines</p>
-              <p>Event details and registration information will be published here when confirmed.</p>
-            </article>
+            <div className="event-details">
+              <div><span className="eyebrow">Saturday · 14 November 2026</span><h3>19H – 03H · Manila, Philippines</h3></div>
+              <p>Event details and registration information will be published here when the official registration destination is confirmed.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="section venue-section">
+          <div className="container venue-grid">
+            <div className="venue-image"><img src="/images/diamond-black-venue.jpg" alt="Diamond Black corporate networking event venue" /></div>
+            <div><span className="eyebrow">The Diamond Black Experience</span><h2>People. Partnerships. Possibilities.</h2><p className="lead">A premium environment designed for meaningful conversations, business connections, collaboration, and celebration.</p><img className="secondary-logo" src="/images/diamond-black-primary.jpg" alt="Diamond Black" /></div>
           </div>
         </section>
 
@@ -106,7 +115,7 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <div className="container footer-inner">
-          <div><strong>DIAMOND BLACK CORPORATION</strong><div>Building connections. Creating opportunities.</div></div>
+          <div className="footer-brand"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" /></div>
           <div className="footer-tagline">BUILD • INNOVATE • EXPAND</div>
           <div>© {new Date().getFullYear()} Diamond Black Corporation</div>
         </div>
