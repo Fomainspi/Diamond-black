@@ -112,3 +112,4 @@ tls/private/
 
 # OS-specific files
 $RECYCLE.BIN/
+next-env.d.ts
