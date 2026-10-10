@@ -4,7 +4,7 @@
 
 A premium corporate website for Diamond Black Corporation, focused on entrepreneurship, innovation, talent, networking, digital marketing, audiovisual production, and corporate events.
 
-> Project status: planning and secure foundation. The application stack and production hosting requirements still need to be confirmed before implementation.
+> Project status: secure repository foundation and architecture planning. Application code has not yet been implemented.
 
 ## Product scope
 
@@ -16,6 +16,7 @@ The public website will include:
 - News
 - Newsletter subscription
 - Contact
+- Privacy and other applicable legal pages
 
 A private admin CMS will manage services, events, news, media, newsletter subscribers/campaigns, contact messages, and site settings.
 
@@ -31,7 +32,20 @@ Follow the approved Diamond Black black-and-gold homepage concept and use the su
 **New Connections. New Business.**  
 Saturday, 14 November 2026 · 19:00–03:00 · Manila, Philippines
 
-The supplied promotional artwork should appear in a featured section on the homepage and at the top of the Events page. Confirm the official registration URL and event timezone before publishing the registration CTA and detailed event schedule.
+Use the supplied promotional artwork. Confirm the event timezone, end date, and official registration URL before publishing detailed schedules or enabling a registration CTA.
+
+## Hosting decision
+
+The initial target is **Amazon Lightsail**, starting with the Linux/Unix 2 GB plan listed at $12/month, subject to final verification before purchase.
+
+- Monthly infrastructure budget ceiling: **US$25**.
+- Initial architecture: one Linux server, Docker Compose, application container, PostgreSQL with persistent storage, and Caddy/Nginx for HTTPS.
+- CI/CD: GitHub Actions for testing, build validation, and deployment.
+- Do not provision cloud resources until the app is tested locally and the cost assumptions are reviewed.
+- Keep database ports private. Configure firewall, secure SSH, HTTPS, backups, monitoring, and a documented restore procedure before production launch.
+- Do not add paid AWS services without checking the effect on the monthly budget.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the planned system and deployment details.
 
 ## Security baseline
 
@@ -39,15 +53,19 @@ The supplied promotional artwork should appear in a featured section on the home
 - Keep local `.env` files untracked; use `.env.example` only for placeholders.
 - Review `.gitignore`, `.dockerignore`, and Git history before pushing.
 - Use server-side validation, least privilege, secure admin authentication, rate limiting, and secret/dependency scanning.
-- See [SECURITY.md](SECURITY.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
+- Never expose PostgreSQL to the public internet.
+- See [SECURITY.md](SECURITY.md).
 
-## Next steps
+## Implementation sequence
 
-1. Confirm the cPanel hosting plan's supported application runtime and database.
-2. Choose the implementation stack based on those constraints.
-3. Build the responsive public website and design system.
-4. Add database migrations and secure admin CMS.
-5. Add newsletter and contact integrations.
-6. Add CI checks, tests, deployment instructions, and backup/restore procedures.
+1. Finalize and review the secure repository foundation.
+2. Build the responsive public website and design system.
+3. Add PostgreSQL schema and migrations.
+4. Implement secure admin authentication and CMS.
+5. Add contact form, newsletter consent/unsubscribe, and email delivery.
+6. Add automated tests, Docker Compose, and CI checks.
+7. Review the deployment cost and provision Lightsail.
+8. Configure HTTPS, firewall, backups, monitoring, and automated deployment.
+9. Complete security, accessibility, SEO, mobile, performance, and recovery checks.
 
 No production credentials, provider keys, or real subscriber/contact data belong in this repository.
