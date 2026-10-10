@@ -18,11 +18,11 @@ export default function HomePage() {
     <>
       <header className="site-header">
         <div className="container header-inner">
-          <a className="brand" href="#home" aria-label="Diamond Black Corporation home">
+          <a className="brand" href="/" aria-label="Diamond Black Corporation home">
             <img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" />
           </a>
           <nav className="nav" aria-label="Main navigation">
-            <a href="#about">About</a><a href="#services">Services</a><a href="#events">Events</a><a href="#news">News</a><a href="#newsletter">Newsletter</a><a href="#contact">Contact</a>
+            <a href="/about">About</a><a href="/services">Services</a><a href="/events">Events</a><a href="/news">News</a><a href="/newsletter">Newsletter</a><a href="/contact">Contact</a>
           </nav>
         </div>
       </header>
@@ -38,8 +38,8 @@ export default function HomePage() {
             <h1>BUILD.<br /><span>INNOVATE.</span><br />EXPAND.</h1>
             <p>We bring people, ideas, and opportunities together to support entrepreneurship, business development, and lasting connections.</p>
             <div className="actions">
-              <a className="button" href="#events">Discover Diamond Black</a>
-              <a className="button button-secondary" href="#contact">Connect With Us</a>
+              <a className="button" href="/events">Discover Diamond Black</a>
+              <a className="button button-secondary" href="/contact">Connect With Us</a>
             </div>
           </div>
         </section>
