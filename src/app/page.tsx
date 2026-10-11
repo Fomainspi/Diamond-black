@@ -23,6 +23,7 @@ export default function HomePage() {
           </a>
           <nav className="nav" aria-label="Main navigation">
             <a href="/about">About</a><a href="/services">Services</a><a href="/events">Events</a><a href="/news">News</a><a href="/newsletter">Newsletter</a><a href="/contact">Contact</a>
+          <a className="social-link header-social" href="https://www.facebook.com/profile.php?id=61594570287188" target="_blank" rel="noreferrer" aria-label="Diamond Black Corporation on Facebook"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3.3 0-5 1.8-5 5v3H6v4h3v4h4v-4h3.2l.8-4H13V9c0-.7.3-1 1-1Z"/></svg></a>
           </nav>
         </div>
       </header>
@@ -121,6 +122,7 @@ export default function HomePage() {
             <p><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.6 3.5 9.4 7l-1.8 2.1a15 15 0 0 0 7.3 7.3L17 14.6l3.5 2.8-.6 3.1c-.2.8-1 1.3-1.8 1.2C9.7 20.3 3.7 14.3 2.3 5.9c-.1-.8.4-1.6 1.2-1.8l3.1-.6Z"/></svg><a href="tel:+6369692116424">+63 6969 211 6424</a></p>
             <p><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><a href="mailto:sales.diamondblack2026@gmail.com">sales.diamondblack2026@gmail.com</a></p>
           </div>
+          <div className="footer-socials"><a className="social-link" href="https://www.facebook.com/profile.php?id=61594570287188" target="_blank" rel="noreferrer" aria-label="Diamond Black Corporation on Facebook"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3.3 0-5 1.8-5 5v3H6v4h3v4h4v-4h3.2l.8-4H13V9c0-.7.3-1 1-1Z"/></svg><span>Facebook</span></a></div>
           <div className="footer-tagline">BUILD • INNOVATE • EXPAND</div>
           <div>© {new Date().getFullYear()} Diamond Black Corporation</div>
         </div>
