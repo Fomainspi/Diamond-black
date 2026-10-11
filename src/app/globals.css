@@ -174,13 +174,3 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .text-link { display: inline-block; margin-top: 8px; color: var(--gold-light); font-weight: 700; text-decoration: none; }
 .text-link:hover { text-decoration: underline; }
 @media (max-width: 800px) { .contact-grid { grid-template-columns: 1fr; } }
-
-.footer-contact { display: grid; gap: 6px; max-width: 380px; }
-.footer-contact p { display: flex; align-items: flex-start; gap: 10px; margin: 0; line-height: 1.5; }
-.footer-contact svg, .contact-icon svg { width: 20px; height: 20px; flex: 0 0 20px; fill: none; stroke: var(--gold-light); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.footer-contact a:hover { color: var(--gold-light); }
-.contact-icon { display: block; margin-bottom: 12px; }
-.contact-icon svg { width: 30px; height: 30px; }
-@media (max-width: 800px) { .footer-contact { width: 100%; max-width: 100%; } }
-
-.social-link{display:inline-flex;align-items:center;gap:8px;color:var(--white);font-weight:700}.social-link svg{width:22px;height:22px;fill:currentColor}.social-link:hover{color:var(--gold-light)}.header-social{margin-left:4px}.header-social span{display:none}.social-links,.footer-socials{display:flex;align-items:center;gap:14px}.social-section{margin-top:34px}
