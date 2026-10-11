@@ -100,10 +100,10 @@ export default function HomePage() {
 
         <section className="section newsletter" id="newsletter">
           <div className="container newsletter-inner">
-            <div><span className="eyebrow">Stay Informed</span><h2>Make room for new opportunities.</h2><p className="lead">Newsletter subscriptions will be enabled when the secure subscription service is implemented.</p></div>
+            <div><span className="eyebrow">Stay Informed</span><h2>Make room for new opportunities.</h2><p className="lead" id="newsletter-note">You can enter your email address, but newsletter subscriptions are not active yet.</p></div>
             <form className="newsletter-form" action="#newsletter">
               <label htmlFor="newsletter-email" className="sr-only">Email address</label>
-              <input id="newsletter-email" type="email" placeholder="Your email address" disabled aria-describedby="newsletter-note" />
+              <input id="newsletter-email" name="email" type="email" placeholder="Your email address" autoComplete="email" aria-describedby="newsletter-note" />
               <button className="button" type="button" disabled>Coming Soon</button>
             </form>
           </div>
