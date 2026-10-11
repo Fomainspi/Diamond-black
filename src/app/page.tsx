@@ -19,11 +19,11 @@ export default function HomePage() {
     <>
       <header className="site-header">
         <div className="container header-inner">
-          <a className="brand" href="/" aria-label="Diamond Black Corporation home">
+          <Link className="brand" href="/" aria-label="Diamond Black Corporation home">
             <img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" />
-          </a>
+          </Link>
           <nav className="nav" aria-label="Main navigation">
-            <a href="/about">About</a><a href="/services">Services</a><a href="/events">Events</a><a href="/news">News</a><a href="/newsletter">Newsletter</a><a href="/contact">Contact</a>
+            <Link href="/about">About</Link><Link href="/services">Services</Link><Link href="/events">Events</Link><Link href="/news">News</Link><Link href="/newsletter">Newsletter</Link><Link href="/contact">Contact</Link>
           <a className="social-link header-social" href="https://www.facebook.com/profile.php?id=61594570287188" target="_blank" rel="noreferrer" aria-label="Diamond Black Corporation on Facebook"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3.3 0-5 1.8-5 5v3H6v4h3v4h4v-4h3.2l.8-4H13V9c0-.7.3-1 1-1Z"/></svg></a>
             <a className="social-link header-social" href="https://www.youtube.com/" target="_blank" rel="noreferrer" aria-label="Diamond Black Corporation on YouTube"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21.6 7.2a2.8 2.8 0 0 0-2-2C17.8 4.7 12 4.7 12 4.7s-5.8 0-7.6.5a2.8 2.8 0 0 0-2 2C2 9 2 12 2 12s0 3 .4 4.8a2.8 2.8 0 0 0 2 2c1.8.5 7.6.5 7.6.5s5.8 0 7.6-.5a2.8 2.8 0 0 0 2-2C22 15 22 12 22 12s0-3-.4-4.8ZM10 15.3V8.7l6 3.3-6 3.3Z"/></svg></a>
           </nav>
@@ -41,8 +41,8 @@ export default function HomePage() {
             <h1>BUILD.<br /><span>INNOVATE.</span><br />EXPAND.</h1>
             <p>We bring people, ideas, and opportunities together to support entrepreneurship, business development, and lasting connections.</p>
             <div className="actions">
-              <a className="button" href="/events">Discover Diamond Black</a>
-              <a className="button button-secondary" href="/contact">Connect With Us</a>
+              <Link className="button" href="/events">Discover Diamond Black</Link>
+              <Link className="button button-secondary" href="/contact">Connect With Us</Link>
             </div>
           </div>
         </section>
