@@ -9,7 +9,7 @@ const fields = [
 export default function RegisterPage() {
   return (
     <>
-      <header className="site-header"><div className="container header-inner"><Link className="brand" href="/"><img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></Link><nav className="nav"><a href="/about">About</a><a href="/services">Services</a><a href="/events">Events</a><a href="/news">News</a><a href="/newsletter">Newsletter</a><a href="/contact">Contact</a></nav></div></header>
+      <header className="site-header"><div className="container header-inner"><Link className="brand" href="/"><img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></Link><nav className="nav"><Link href="/about">About</Link><Link href="/services">Services</Link><Link href="/events">Events</Link><Link href="/news">News</Link><Link href="/newsletter">Newsletter</Link><Link href="/contact">Contact</Link></nav></div></header>
       <main>
         <section className="page-hero"><div className="container"><span className="eyebrow">100 People · One Night</span><h1>Register</h1></div></section>
         <section className="section"><div className="container registration-layout">
