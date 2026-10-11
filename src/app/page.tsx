@@ -116,6 +116,11 @@ export default function HomePage() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <div className="footer-brand"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" /></div>
+          <div className="footer-contact">
+            <p><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 22s7-6.1 7-13a7 7 0 1 0-14 0c0 6.9 7 13 7 13Z"/><circle cx="12" cy="9" r="2.3"/></svg><span>29F High Street South Corporate Plaza Tower 2, Taguig City, Philippines, 1700</span></p>
+            <p><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6.6 3.5 9.4 7l-1.8 2.1a15 15 0 0 0 7.3 7.3L17 14.6l3.5 2.8-.6 3.1c-.2.8-1 1.3-1.8 1.2C9.7 20.3 3.7 14.3 2.3 5.9c-.1-.8.4-1.6 1.2-1.8l3.1-.6Z"/></svg><a href="tel:+6369692116424">+63 6969 211 6424</a></p>
+            <p><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><a href="mailto:sales.diamondblack2026@gmail.com">sales.diamondblack2026@gmail.com</a></p>
+          </div>
           <div className="footer-tagline">BUILD • INNOVATE • EXPAND</div>
           <div>© {new Date().getFullYear()} Diamond Black Corporation</div>
         </div>

@@ -174,3 +174,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .text-link { display: inline-block; margin-top: 8px; color: var(--gold-light); font-weight: 700; text-decoration: none; }
 .text-link:hover { text-decoration: underline; }
 @media (max-width: 800px) { .contact-grid { grid-template-columns: 1fr; } }
+
+.footer-contact { display: grid; gap: 6px; max-width: 380px; }
+.footer-contact p { display: flex; align-items: flex-start; gap: 10px; margin: 0; line-height: 1.5; }
+.footer-contact svg, .contact-icon svg { width: 20px; height: 20px; flex: 0 0 20px; fill: none; stroke: var(--gold-light); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.footer-contact a:hover { color: var(--gold-light); }
+.contact-icon { display: block; margin-bottom: 12px; }
+.contact-icon svg { width: 30px; height: 30px; }
+@media (max-width: 800px) { .footer-contact { width: 100%; max-width: 100%; } }
