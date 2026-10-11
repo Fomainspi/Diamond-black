@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEWSLETTER_PROVIDER: ${NEWSLETTER_PROVIDER:-disabled}
+      NEWSLETTER_API_KEY: ${NEWSLETTER_API_KEY:-}
+      NEWSLETTER_AUDIENCE_ID: ${NEWSLETTER_AUDIENCE_ID:-}
+    expose:
+      - "3000"
+    networks:
+      - app-internal
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    init: true
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app-internal
+    depends_on:
+      - app
+
+networks:
+  app-internal:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:
