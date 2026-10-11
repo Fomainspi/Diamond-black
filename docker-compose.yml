@@ -7,6 +7,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      NEWSLETTER_PROVIDER: ${NEWSLETTER_PROVIDER:-disabled}
+      NEWSLETTER_API_KEY: ${NEWSLETTER_API_KEY:-}
+      NEWSLETTER_AUDIENCE_ID: ${NEWSLETTER_AUDIENCE_ID:-}
     expose:
       - "3000"
     networks:

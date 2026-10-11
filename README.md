@@ -56,6 +56,23 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the planned system and deployment det
 - Never expose PostgreSQL to the public internet.
 - See [SECURITY.md](SECURITY.md).
 
+## Newsletter backend (Mailchimp)
+
+The public newsletter form posts to the server-side `/api/newsletter` route. The route validates input and consent, applies basic request throttling and a honeypot check, then submits new contacts to a Mailchimp audience with `pending` status so they must confirm before becoming subscribed. The API key is never sent to the browser. Subscriber records are held by Mailchimp, not copied into the local PostgreSQL database.
+
+To enable it:
+
+1. Create or select the Diamond Black audience in Mailchimp and copy its Audience ID.
+2. Create a dedicated Mailchimp API key. Keep it private; its suffix (for example, `-us21`) identifies the data center.
+3. Set these environment variables in the runtime environment (or the server's untracked `.env` file used by Docker Compose):
+   - `NEWSLETTER_PROVIDER=mailchimp`
+   - `NEWSLETTER_API_KEY=<your-private-api-key>`
+   - `NEWSLETTER_AUDIENCE_ID=<your-audience-id>`
+4. Recreate the app container after changing environment variables, then test signup with an address you control and confirm the email.
+5. Verify the audience's sender/domain configuration and unsubscribe preferences in Mailchimp before sending campaigns.
+
+Do not paste API keys into GitHub source files or chat. `.env.example` contains placeholders only. The API returns a service-unavailable message until all three settings are configured. The in-memory request throttle is suitable only for the current single-app instance; use a shared rate limiter before scaling to multiple app instances.
+
 ## Implementation sequence
 
 1. Finalize and review the secure repository foundation.
