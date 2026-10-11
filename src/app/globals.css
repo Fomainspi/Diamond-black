@@ -233,3 +233,37 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .footer-contact { width: 100%; }
   .footer-socials { width: 100%; }
 }
+
+
+.newsletter-form { flex-wrap: wrap; align-items: center; }
+.newsletter-form .newsletter-consent {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+.newsletter-form .newsletter-consent input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  margin: 3px 0 0;
+  accent-color: var(--gold);
+}
+.newsletter-honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+.newsletter-feedback { flex: 1 0 100%; margin: 0; color: var(--gold-light); font-size: .88rem; }
+.newsletter-feedback-error { color: #ffb4a9; }
+.newsletter-form button:disabled { opacity: .65; cursor: wait; }
+@media (max-width: 480px) {
+  .newsletter-form { width: 100%; }
+  .newsletter-form .newsletter-consent { flex-basis: auto; }
+}

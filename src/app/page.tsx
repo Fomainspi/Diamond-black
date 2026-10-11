@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NewsletterForm from "../components/NewsletterForm";
 const services = [
   { number: "01", title: "Strategic Networking", text: "Create meaningful connections that open doors to collaboration and business growth." },
   { number: "02", title: "Digital Marketing", text: "Build a stronger brand presence through focused digital communication and campaigns." },
@@ -100,12 +101,8 @@ export default function HomePage() {
 
         <section className="section newsletter" id="newsletter">
           <div className="container newsletter-inner">
-            <div><span className="eyebrow">Stay Informed</span><h2>Make room for new opportunities.</h2><p className="lead" id="newsletter-note">You can enter your email address, but newsletter subscriptions are not active yet.</p></div>
-            <form className="newsletter-form" action="#newsletter">
-              <label htmlFor="newsletter-email" className="sr-only">Email address</label>
-              <input id="newsletter-email" name="email" type="email" placeholder="Your email address" autoComplete="email" aria-describedby="newsletter-note" />
-              <button className="button" type="button" disabled>Coming Soon</button>
-            </form>
+            <div><span className="eyebrow">Stay Informed</span><h2>Make room for new opportunities.</h2><p className="lead" id="newsletter-note">Get company news, insights, and upcoming opportunities delivered to your inbox.</p></div>
+            <NewsletterForm />
           </div>
         </section>
 
