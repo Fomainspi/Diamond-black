@@ -24,6 +24,7 @@ services:
     image: caddy:2-alpine
     environment:
       ACME_EMAIL: ${ACME_EMAIL}
+      SITE_ADDRESS: ${SITE_ADDRESS}
     restart: unless-stopped
     ports:
       - "80:80"
