@@ -16,10 +16,11 @@ export default function RegisterPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formElement = event.currentTarget;
     setStatus("sending");
     setMessage("");
 
-    const form = new FormData(event.currentTarget);
+    const form = new FormData(formElement);
     const guests = form.get("guests");
     const consent = form.get("consent") === "on";
 
@@ -46,7 +47,7 @@ export default function RegisterPage() {
 
       setStatus("success");
       setMessage(data.message);
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "We couldn't complete your registration.");
