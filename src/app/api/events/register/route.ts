@@ -1,5 +1,7 @@
+
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,8 +22,12 @@ function isRateLimited(key: string) {
   }
 
   const entry = rateLimit.get(key);
+
   if (!entry || entry.resetAt <= now) {
-    rateLimit.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    rateLimit.set(key, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
     return false;
   }
 
@@ -39,43 +45,68 @@ function escapeHtml(value: string) {
 }
 
 function normalizeText(value: unknown, maxLength: number) {
-  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+  return typeof value === "string"
+    ? value.trim().slice(0, maxLength)
+    : "";
 }
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
-  const host = request.headers.get("x-forwarded-host")?.split(",")[0].trim()
-    || request.headers.get("host");
+  const host =
+    request.headers.get("x-forwarded-host")?.split(",")[0].trim() ||
+    request.headers.get("host");
 
   if (!origin || !host) {
-    return json("This request could not be verified. Please refresh the page and try again.", 403);
+    return json(
+      "This request could not be verified. Please refresh the page and try again.",
+      403,
+    );
   }
 
   try {
     if (new URL(origin).host !== host) {
-      return json("This request could not be verified. Please refresh the page and try again.", 403);
+      return json(
+        "This request could not be verified. Please refresh the page and try again.",
+        403,
+      );
     }
   } catch {
-    return json("This request could not be verified. Please refresh the page and try again.", 403);
+    return json(
+      "This request could not be verified. Please refresh the page and try again.",
+      403,
+    );
   }
 
-  const contentLength = Number(request.headers.get("content-length") ?? "0");
-  if (contentLength > 8192) return json("The request is too large.", 413);
+  const contentLength = Number(
+    request.headers.get("content-length") ?? "0",
+  );
+
+  if (contentLength > 8192) {
+    return json("The request is too large.", 413);
+  }
 
   const forwardedFor = request.headers.get("x-forwarded-for");
-  const clientKey = forwardedFor?.split(",").at(-1)?.trim() || "unknown-client";
+  const clientKey =
+    forwardedFor?.split(",").at(-1)?.trim() || "unknown-client";
+
   if (isRateLimited(clientKey)) {
-    return json("Too many attempts. Please wait a little before trying again.", 429);
+    return json(
+      "Too many attempts. Please wait a little before trying again.",
+      429,
+    );
   }
 
   let body: unknown;
+
   try {
     body = await request.json();
   } catch {
     return json("Please submit a valid form.", 400);
   }
 
-  if (!body || typeof body !== "object") return json("Please submit a valid form.", 400);
+  if (!body || typeof body !== "object") {
+    return json("Please submit a valid form.", 400);
+  }
 
   const data = body as Record<string, unknown>;
 
@@ -92,14 +123,43 @@ export async function POST(request: Request) {
   const consent = data.consent === true;
 
   if (!fullName || !email || !phone || !guests || !consent) {
-    return json("Please complete all required fields and accept the contact consent.", 400);
+    return json(
+      "Please complete all required fields and accept the contact consent.",
+      400,
+    );
   }
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(email)) return json("Please enter a valid email address.", 400);
+
+  if (!emailPattern.test(email)) {
+    return json("Please enter a valid email address.", 400);
+  }
 
   if (!["1", "2", "3", "4"].includes(guests)) {
     return json("Please select a valid number of attendees.", 400);
+  }
+
+  // Save the registration before attempting to send emails.
+  let registration;
+
+  try {
+    registration = await prisma.eventRegistration.create({
+      data: {
+        fullName,
+        email,
+        phone,
+        company: company || null,
+        guests: Number(guests),
+        consent,
+      },
+    });
+  } catch (error) {
+    console.error("Event registration database save failed:", error);
+
+    return json(
+      "We couldn't save your registration right now. Please try again later.",
+      503,
+    );
   }
 
   const mailHost = process.env.MAIL_HOST;
@@ -107,22 +167,32 @@ export async function POST(request: Request) {
   const mailUser = process.env.MAIL_USER;
   const mailPassword = process.env.MAIL_PASSWORD;
   const fromAddress = process.env.MAIL_FROM_ADDRESS || mailUser;
-  const fromName = process.env.MAIL_FROM_NAME || "Diamond Black Corporation";
-  const notificationEmail = process.env.EVENT_NOTIFICATION_EMAIL || mailUser;
+  const fromName =
+    process.env.MAIL_FROM_NAME || "Diamond Black Corporation";
+  const notificationEmail =
+    process.env.EVENT_NOTIFICATION_EMAIL || mailUser;
 
-  if (!mailHost || !mailUser || !mailPassword || !fromAddress || !notificationEmail) {
-    return json("Event registration is temporarily unavailable. Please try again later.", 503);
-  }
-
-  const smtp = nodemailer.createTransport({
-    host: mailHost,
-    port: mailPort,
-    secure: mailPort === 465,
-    auth: { user: mailUser, pass: mailPassword },
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 10000,
-  });
+  // Create an SMTP transport only when the configuration is complete.
+  // Missing SMTP settings must not undo or block a saved registration.
+  const smtp =
+    mailHost &&
+    mailUser &&
+    mailPassword &&
+    fromAddress &&
+    notificationEmail
+      ? nodemailer.createTransport({
+          host: mailHost,
+          port: mailPort,
+          secure: mailPort === 465,
+          auth: {
+            user: mailUser,
+            pass: mailPassword,
+          },
+          connectionTimeout: 8000,
+          greetingTimeout: 8000,
+          socketTimeout: 10000,
+        })
+      : null;
 
   const safeName = escapeHtml(fullName);
   const safeEmail = escapeHtml(email);
@@ -163,28 +233,81 @@ export async function POST(request: Request) {
   </div>
 </body></html>`;
 
-  try {
-    await smtp.sendMail({
-      from: `"${fromName}" <${fromAddress}>`,
-      to: email,
-      replyTo: fromAddress,
-      subject: "Registration received | 100 People. One Night.",
-      html: participantHtml,
-      text: `Dear ${fullName},\n\nThank you for registering for 100 People. One Night. We received your registration for Saturday, 14 November 2026, 19H–03H in Manila.\n\nDiamond Black Corporation`,
-    });
+  let confirmationEmail: "SENT" | "FAILED" = "FAILED";
+  let notificationEmailStatus: "SENT" | "FAILED" = "FAILED";
+  let emailError: string | null = null;
 
-    await smtp.sendMail({
-      from: `"${fromName}" <${fromAddress}>`,
-      to: notificationEmail,
-      replyTo: email,
-      subject: `New event registration | ${fullName}`,
-      html: notificationHtml,
-      text: `New event registration\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nCompany: ${company || "Not provided"}\nAttendees: ${guests}`,
-    });
+  if (smtp) {
+    // Attempt the participant email independently.
+    try {
+      await smtp.sendMail({
+        from: `"${fromName}" <${fromAddress}>`,
+        to: email,
+        replyTo: fromAddress,
+        subject: "Registration received | 100 People. One Night.",
+        html: participantHtml,
+        text: `Dear ${fullName},
 
-    return json("Registration received. A confirmation email has been sent.", 200);
-  } catch (error) {
-    console.error("Event registration email failed:", error);
-    return json("We couldn't complete your registration right now. Please try again later.", 502);
+Thank you for registering for 100 People. One Night. We received your registration for Saturday, 14 November 2026, 19H–03H in Manila.
+
+Diamond Black Corporation`,
+      });
+
+      confirmationEmail = "SENT";
+    } catch (error) {
+      console.error("Participant confirmation email failed:", error);
+      emailError = "Participant confirmation email failed.";
+    }
+
+    // Attempt the admin notification even if the participant email fails.
+    try {
+      await smtp.sendMail({
+        from: `"${fromName}" <${fromAddress}>`,
+        to: notificationEmail,
+        replyTo: email,
+        subject: `New event registration | ${fullName}`,
+        html: notificationHtml,
+        text: `New event registration
+
+Name: ${fullName}
+Email: ${email}
+Phone: ${phone}
+Company: ${company || "Not provided"}
+Attendees: ${guests}`,
+      });
+
+      notificationEmailStatus = "SENT";
+    } catch (error) {
+      console.error("Admin notification email failed:", error);
+      emailError = emailError
+        ? `${emailError} Admin notification email failed.`
+        : "Admin notification email failed.";
+    }
+  } else {
+    emailError = "SMTP configuration is incomplete.";
+    console.error(
+      "Event registration emails were not attempted because SMTP configuration is incomplete.",
+    );
   }
+
+  // Record email delivery outcomes without discarding the registration.
+  try {
+    await prisma.eventRegistration.update({
+      where: { id: registration.id },
+      data: {
+        confirmationEmail,
+        notificationEmail: notificationEmailStatus,
+        emailError,
+      },
+    });
+  } catch (error) {
+    console.error("Could not update registration email statuses:", error);
+  }
+
+  return json(
+    confirmationEmail === "SENT" && notificationEmailStatus === "SENT"
+      ? "Registration received. A confirmation email has been sent."
+      : "Your registration has been received, but email delivery may be delayed.",
+    200,
+  );
 }

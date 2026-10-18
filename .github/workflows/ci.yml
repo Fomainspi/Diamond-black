@@ -3,7 +3,11 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, setup/secure-foundation, feature/application-foundation]
+    branches:
+      - main
+      - setup/secure-foundation
+      - feature/application-foundation
+      - feature/event-registration-database
 
 permissions:
   contents: read
@@ -18,15 +22,24 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
       - name: Type-check
         run: npm run typecheck
+
       - name: Lint
         run: npm run lint
+
       - name: Build
         run: npm run build

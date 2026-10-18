@@ -1,0 +1,41 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RegistrationStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model EventRegistration {
+  id                String             @id @default(cuid())
+  fullName          String
+  email             String
+  phone             String
+  company           String?
+  guests            Int                @default(1)
+  consent           Boolean            @default(false)
+  eventName         String             @default("100 People · One Night")
+  status            RegistrationStatus @default(CONFIRMED)
+  confirmationEmail EmailStatus        @default(PENDING)
+  notificationEmail EmailStatus        @default(PENDING)
+  emailError        String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([email])
+  @@index([createdAt])
+  @@index([status])
+}

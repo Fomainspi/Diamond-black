@@ -10,17 +10,22 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "next": "^16.4.0",
+    "nodemailer": "^10.0.16",
+    "pg": "^8.23.1",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "nodemailer": "^10.0.16"
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.30.0",
     "eslint-config-next": "^16.4.0",
+    "prisma": "^7.10.1",
     "typescript": "^5.9.0"
   }
 }
