@@ -1,7 +1,7 @@
 
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
-import { prisma } from "@/lib/prisma";
+import { getPrismaClient } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -143,6 +143,8 @@ export async function POST(request: Request) {
   let registration;
 
   try {
+    const prisma = getPrismaClient();
+
     registration = await prisma.eventRegistration.create({
       data: {
         fullName,
@@ -292,6 +294,8 @@ Attendees: ${guests}`,
 
   // Record email delivery outcomes without discarding the registration.
   try {
+    const prisma = getPrismaClient();
+
     await prisma.eventRegistration.update({
       where: { id: registration.id },
       data: {
