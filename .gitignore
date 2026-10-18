@@ -113,3 +113,12 @@ tls/private/
 # OS-specific files
 $RECYCLE.BIN/
 next-env.d.ts
+
+/src/generated/prisma
+tsconfig.tsbuildinfo
+
+# Local AI tooling and generated skill references
+/.agents/
+/.claude/
+/.windsurf/
+/skills-lock.json
