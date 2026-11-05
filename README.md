@@ -6,43 +6,43 @@ Production website: https://diamondblack-ph.com
 Repository: https://github.com/Fomainspi/Diamond-black
 
 ## Application
-Next.js 16.4, React 19, TypeScript, Prisma 7, PostgreSQL 16, Docker Compose and Caddy. The public site and administration CMS are in the same application under `/admin`.
+Next.js 16.4, React 19, TypeScript, Prisma 7 and PostgreSQL 16. Public website and CMS are served by the same app; administration is under `/admin`.
 
 ## Public website
-Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Event registration at `/events/register` persists to PostgreSQL using the existing `EventRegistration` model. SMTP confirmation/notification outcomes are stored independently. Newsletter signup integrates with Mailchimp pending/double opt-in.
+Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Event registration at `/events/register` persists to PostgreSQL through the existing `EventRegistration` model. Newsletter signup uses the existing opt-in integration.
 
 ## CMS modules
-- One initial administrator, provisioned by a controlled seed command; no public visitor accounts or signup.
-- Protected sign-in/out using bcrypt password hashes, opaque session tokens and HTTP-only SameSite cookies.
-- Dashboard metrics and audit history.
-- News/article and reusable page content with draft/published/archived state.
-- Event management.
+- One first administrator; no public visitor accounts or signup.
+- Password sign-in, secure HTTP-only sessions and server-side authorization.
+- Dashboard and audit history.
+- News/article and reusable page content with draft/published/archived status.
+- Managed events, rendered on the public Events page once published.
 - Private attendee search, status management and authenticated CSV export.
-- Contact inbox and enquiry API.
-- Media library (JPEG/PNG/WebP/GIF, maximum 5 MB).
-- Site settings and audit log.
+- Contact inbox and public contact submission API.
+- Image library with JPEG/PNG/WebP/GIF allow-list, 5 MB maximum and image-signature checks.
+- Organisation site settings.
 
 ## Database
-PostgreSQL 16 via Prisma 7 and `@prisma/adapter-pg`. CMS tables are introduced by additive migration `20261106003000_cms_foundation`. Existing EventRegistration rows are not altered or deleted.
+Prisma 7 with PostgreSQL. Additive migration `20261106003000_cms_foundation` creates CMS tables only. It does not alter or remove existing registrations.
 
 ## Local development
-Use Node.js 22 and a separate development database:
+Use Node.js 22 and a separate development database.
 ```bash
 npm ci
 npx prisma generate
 npm run dev
 ```
-Run `npm run typecheck`, `npm run lint` and `npm run build` before changes are merged.
+Checks: `npm run typecheck`, `npm run lint`, `npm run build`.
 
-## Initial administrator provisioning
-Set only in the private server environment: `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_INITIAL_PASSWORD` (at least 14 characters) and optional `ADMIN_NAME`. After deploying code, run inside the app container:
+## Administrator bootstrap
+Set privately on the server: `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_INITIAL_PASSWORD` (14+ characters), optional `ADMIN_NAME`. After deploying code, run inside the app container:
 ```bash
 npx prisma migrate deploy
 npm run db:seed-admin
 ```
-The seed is idempotent and does not reset existing passwords. Remove `ADMIN_INITIAL_PASSWORD` immediately after provisioning. Login at `/admin/login`.
+The bootstrap is idempotent and does not reset an existing password. Remove `ADMIN_INITIAL_PASSWORD` immediately after success. Login: `/admin/login`. There is no public sign-up or reset form.
 
-## Production controls
-Back up and test restore PostgreSQL before migration. Persist and back up `public/uploads`. Apply the migration during a controlled change window and test admin login, publishing, registrations, contact messages and media upload over HTTPS. Keep PostgreSQL private. Never commit secrets or production data.
+## Production gates
+Back up and test restore PostgreSQL before migration. Persist and back up the Docker Compose `uploads_data` volume mounted at `/app/public/uploads`. Apply the additive migration deliberately during a maintenance window, then smoke-test sign-in, published news/events, attendee export, contact inbox and media upload over HTTPS. Keep PostgreSQL private and never commit credentials.
 
-Documentation: [Architecture](ARCHITECTURE.md) · [Security](SECURITY.md) · [Production operations](docs/PRODUCTION-OPERATIONS.md) · [CMS implementation](docs/CMS-IMPLEMENTATION.md)
+More detail: [CMS implementation](docs/CMS-IMPLEMENTATION.md), [Architecture](ARCHITECTURE.md), [Security](SECURITY.md).
