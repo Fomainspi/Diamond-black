@@ -43,3 +43,15 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Build production Docker image
+        run: docker build -t diamond-black-ci .
+
+      - name: Verify Prisma runtime in production image
+        run: |
+          docker run --rm --entrypoint sh diamond-black-ci -c '
+            test -d /app/src/generated/prisma &&
+            test -d /app/node_modules/@prisma/adapter-pg &&
+            test -d /app/node_modules/pg &&
+            echo "Prisma Client, PostgreSQL adapter, and pg driver are present."
+          '
