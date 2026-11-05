@@ -10,13 +10,11 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
-    "db:migrate:deploy": "prisma migrate deploy",
-    "db:seed-admin": "node prisma/seed-admin.mjs"
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
-    "bcryptjs": "^3.0.2",
     "next": "^16.4.0",
     "nodemailer": "^10.0.16",
     "pg": "^8.23.1",
