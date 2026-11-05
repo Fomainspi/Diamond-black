@@ -1,6 +1,6 @@
 import Link from "next/link";
-import {requireAdmin} from "@/lib/auth";
-import {logoutAdmin} from "@/app/admin/actions";
+import { requireAdmin } from "@/lib/auth";
+import { logoutAdmin } from "@/app/admin/(protected)/actions";
 import "../../globals.css";
 import "../admin.css";
 export const metadata={title:"Administration | Diamond Black Corporation"};
