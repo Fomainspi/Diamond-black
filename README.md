@@ -2,87 +2,82 @@
 
 **Build • Innovate • Expand**
 
-A premium corporate website for Diamond Black Corporation, focused on entrepreneurship, innovation, talent, networking, digital marketing, audiovisual production, and corporate events.
+A Next.js corporate website for Diamond Black Corporation.
 
-> Project status: secure repository foundation and architecture planning. Application code has not yet been implemented.
+> **Status — 6 November 2026:** The public website is deployed on Amazon Lightsail. PostgreSQL persistence and public event registration are implemented and working in production. Transactional event emails have been verified. The private CMS is planned but is not yet implemented or deployed.
 
-## Product scope
+## Live services
+- Website: https://diamondblack-ph.com
+- Event registration: https://diamondblack-ph.com/events/register
+- Repository: https://github.com/Fomainspi/Diamond-black
 
-The public website will include:
-- Home
-- About Us
-- Services
-- Events
-- News
-- Newsletter subscription
-- Contact
-- Privacy and other applicable legal pages
+## Implemented: public event registration
+The 100 People · One Night registration form is available at `/events/register` and submits to `POST /api/events/register`.
 
-A private admin CMS will manage services, events, news, media, newsletter subscribers/campaigns, contact messages, and site settings.
+The server checks the request origin/host and size, applies a basic in-memory rate limit and honeypot, validates required fields, email format, attendee count and consent, then saves the registration to PostgreSQL through Prisma. It subsequently attempts the attendee confirmation and administrator notification independently through SMTP. Each email outcome is stored separately as `PENDING`, `SENT` or `FAILED`; a failed email does not discard a saved registration.
 
-Public visitors will **not** create accounts or profiles.
+Registration data is private server-side data. There is currently no public endpoint that lists registrations and no CMS interface for browsing them.
 
-## Design direction
+## Implemented: database
+- PostgreSQL 16 (Alpine container image).
+- Prisma 7 with `@prisma/adapter-pg` and the `pg` driver.
+- Prisma schema: [`prisma/schema.prisma`](prisma/schema.prisma).
+- Initial migration: [`prisma/migrations/20261017235123_create_event_registration/migration.sql`](prisma/migrations/20261017235123_create_event_registration/migration.sql).
+- Current implemented model: `EventRegistration`.
+- Production database name: `diamond_black_dev`; configured application user: `diamondblack`.
+- The app connects internally to `db:5432` on a private Docker network. PostgreSQL is not exposed through a public host port.
+- Docker named volume `postgres_data` persists database files across normal container recreation. A persistent volume is not a backup; independent backups and restore tests must be verified separately.
 
-Follow the approved Diamond Black black-and-gold homepage concept and use the supplied official logo and event artwork. The visual identity is premium, elegant, cinematic, and corporate, with black/dark charcoal, metallic gold, white, restrained animation, and subtle diamond geometry.
+See [`docs/PRODUCTION-OPERATIONS.md`](docs/PRODUCTION-OPERATIONS.md) for safe inspection commands and operational guidance.
 
-## Featured event
+## Implemented: newsletter
+`POST /api/newsletter` validates email and consent, performs basic origin/rate-limit/honeypot checks, and submits to Mailchimp using pending/double-opt-in status. Newsletter contacts are stored by Mailchimp, not duplicated in the local PostgreSQL database.
 
-**100 People — One Night**  
-**New Connections. New Business.**  
-Saturday, 14 November 2026 · 19:00–03:00 · Manila, Philippines
+## Production architecture
+The deployed stack runs on Amazon Lightsail (Ubuntu 24.04) using Docker Compose:
+- Next.js standalone application container.
+- PostgreSQL 16 container with persistent `postgres_data` volume.
+- Caddy reverse proxy for HTTPS and application routing.
+- Private Docker bridge network for application/database communication.
+- Titan SMTP for transactional event email.
 
-Use the supplied promotional artwork. Confirm the event timezone, end date, and official registration URL before publishing detailed schedules or enabling a registration CTA.
+The application uses server-side Next.js routes; the browser never connects directly to PostgreSQL. Runtime credentials are supplied through the private server environment and must never be committed or shared.
 
-## Hosting decision
+## Technology
+Next.js 16.4, React 19, TypeScript, Prisma 7, PostgreSQL 16, Docker Compose, Caddy, Nodemailer, Mailchimp API and GitHub Actions.
 
-The initial target is **Amazon Lightsail**, starting with the Linux/Unix 2 GB plan listed at $12/month, subject to final verification before purchase.
+## CMS roadmap — not implemented yet
+The next milestone is a private CMS. Public visitors will not have accounts. The first release will support one administrator, with an extensible design for additional administrators/roles later.
 
-- Monthly infrastructure budget ceiling: **US$25**.
-- Initial architecture: one Linux server, Docker Compose, application container, PostgreSQL with persistent storage, and Caddy/Nginx for HTTPS.
-- CI/CD: GitHub Actions for testing, build validation, and deployment.
-- Do not provision cloud resources until the app is tested locally and the cost assumptions are reviewed.
-- Keep database ports private. Configure firewall, secure SSH, HTTPS, backups, monitoring, and a documented restore procedure before production launch.
-- Do not add paid AWS services without checking the effect on the monthly budget.
+Planned modules: secure sign-in/sign-out and protected admin routes; dashboard; content/page publishing; event management; private registration search/filter and CSV export; contact inbox; media library; site settings; Mailchimp-integrated newsletter management; and audit records.
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the planned system and deployment details.
+**There is no administrator login or deployed CMS yet.** Scope and progress are tracked in [`docs/CMS-IMPLEMENTATION.md`](docs/CMS-IMPLEMENTATION.md).
 
-## Security baseline
+## CI and development
+GitHub Actions installs dependencies, generates Prisma Client, runs type-checking and ESLint, builds Next.js and the Docker image, and checks that Prisma runtime dependencies are included.
 
-- Never commit real secrets, production data, database dumps, subscriber lists, or contact submissions.
-- Keep local `.env` files untracked; use `.env.example` only for placeholders.
-- Review `.gitignore`, `.dockerignore`, and Git history before pushing.
-- Use server-side validation, least privilege, secure admin authentication, rate limiting, and secret/dependency scanning.
-- Never expose PostgreSQL to the public internet.
-- See [SECURITY.md](SECURITY.md).
+Use Node.js 22:
 
-## Newsletter backend (Mailchimp)
+```bash
+npm ci
+npx prisma generate
+npm run dev
+```
 
-The public newsletter form posts to the server-side `/api/newsletter` route. The route validates input and consent, applies basic request throttling and a honeypot check, then submits new contacts to a Mailchimp audience with `pending` status so they must confirm before becoming subscribed. The API key is never sent to the browser. Subscriber records are held by Mailchimp, not copied into the local PostgreSQL database.
+Before submitting changes:
 
-To enable it:
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
-1. Create or select the Diamond Black audience in Mailchimp and copy its Audience ID.
-2. Create a dedicated Mailchimp API key. Keep it private; its suffix (for example, `-us21`) identifies the data center.
-3. Set these environment variables in the runtime environment (or the server's untracked `.env` file used by Docker Compose):
-   - `NEWSLETTER_PROVIDER=mailchimp`
-   - `NEWSLETTER_API_KEY=<your-private-api-key>`
-   - `NEWSLETTER_AUDIENCE_ID=<your-audience-id>`
-4. Recreate the app container after changing environment variables, then test signup with an address you control and confirm the email.
-5. Verify the audience's sender/domain configuration and unsubscribe preferences in Mailchimp before sending campaigns.
+Use a development-only database locally. Never use production credentials or data for local development. Database changes must include reviewed Prisma migrations; do not run unreviewed migrations against production.
 
-Do not paste API keys into GitHub source files or chat. `.env.example` contains placeholders only. The API returns a service-unavailable message until all three settings are configured. The in-memory request throttle is suitable only for the current single-app instance; use a shared rate limiter before scaling to multiple app instances.
+## Documentation
+- [Architecture](ARCHITECTURE.md)
+- [Security policy](SECURITY.md)
+- [Production database and event registration runbook](docs/PRODUCTION-OPERATIONS.md)
+- [CMS implementation scope](docs/CMS-IMPLEMENTATION.md)
 
-## Implementation sequence
-
-1. Finalize and review the secure repository foundation.
-2. Build the responsive public website and design system.
-3. Add PostgreSQL schema and migrations.
-4. Implement secure admin authentication and CMS.
-5. Add contact form, newsletter consent/unsubscribe, and email delivery.
-6. Add automated tests, Docker Compose, and CI checks.
-7. Review the deployment cost and provision Lightsail.
-8. Configure HTTPS, firewall, backups, monitoring, and automated deployment.
-9. Complete security, accessibility, SEO, mobile, performance, and recovery checks.
-
-No production credentials, provider keys, or real subscriber/contact data belong in this repository.
+The original hosting budget target is US$25/month; review actual pricing before adding infrastructure or paid services.
