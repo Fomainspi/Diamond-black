@@ -38,6 +38,8 @@ services:
     volumes:
       - uploads_data:/app/public/uploads
     expose: ["3000"]
+    volumes:
+      - uploads_data:/app/public/uploads
     networks: [app-internal]
     depends_on:
       db:
@@ -66,4 +68,5 @@ volumes:
   caddy_data:
   caddy_config:
   postgres_data:
+  uploads_data:
   uploads_data:

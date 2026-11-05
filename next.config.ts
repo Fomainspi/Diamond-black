@@ -10,6 +10,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  experimental: { serverActions: { bodySizeLimit: '6mb' } },
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
   outputFileTracingIncludes: {
     "/api/events/register": [

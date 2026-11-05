@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
-import { logoutAdmin } from "@/app/admin/actions";
+import {requireAdmin} from "@/lib/auth";
+import {logoutAdmin} from "@/app/admin/actions";
 import "../../globals.css";
 import "../admin.css";
 export const metadata={title:"Administration | Diamond Black Corporation"};
-export default async function ProtectedAdminLayout({children}:{children:React.ReactNode}){
+export default async function ProtectedLayout({children}:{children:React.ReactNode}){
  const admin=await requireAdmin();
  return <div className="admin-shell"><aside className="admin-sidebar">
  <Link href="/admin" className="admin-brand">DIAMOND <span>BLACK</span><small>CONTROL ROOM</small></Link>
