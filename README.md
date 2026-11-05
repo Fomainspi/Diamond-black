@@ -6,10 +6,10 @@ Production website: https://diamondblack-ph.com
 Repository: https://github.com/Fomainspi/Diamond-black
 
 ## Application
-Next.js 16.4, React 19, TypeScript, Prisma 7 and PostgreSQL 16. Public website and CMS are served by the same app; administration is under `/admin`.
+Next.js 16.4, React 19, TypeScript, Prisma 7 and PostgreSQL 16. Public website and CMS are served by the same app; administration is under /admin.
 
 ## Public website
-Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Event registration at `/events/register` persists to PostgreSQL through the existing `EventRegistration` model. Newsletter signup uses the existing opt-in integration.
+Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Event registration at /events/register persists to PostgreSQL through the existing EventRegistration model. Newsletter signup uses the existing opt-in integration.
 
 ## CMS modules
 - One first administrator; no public visitor accounts or signup.
@@ -23,26 +23,33 @@ Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Ev
 - Organisation site settings.
 
 ## Database
-Prisma 7 with PostgreSQL. Additive migration `20261106003000_cms_foundation` creates CMS tables only. It does not alter or remove existing registrations.
+Prisma 7 with PostgreSQL. Additive migration 20261106003000_cms_foundation creates CMS tables only. It does not alter or remove existing registrations. The Prisma datasource URL is configured in prisma.config.ts through DATABASE_URL.
 
 ## Local development
-Use Node.js 22 and a separate development database.
+Use Node.js 22 and a separate development database. Set DATABASE_URL in your private local environment.
+
 ```bash
 npm ci
 npx prisma generate
 npm run dev
 ```
-Checks: `npm run typecheck`, `npm run lint`, `npm run build`.
+
+Checks: npm run typecheck, npm run lint, npm run build.
+
+## Docker images and database operations
+The runner target is the lean Next.js web runtime. The migration target is a separate operator-only image containing Prisma CLI, migrations and the admin bootstrap script. Both must be built from the same source commit. The web container does not run migrations automatically.
+
+```bash
+docker build --target runner -t diamond-black-web:<release> .
+docker build --target migration -t diamond-black-ops:<release> .
+```
+
+See docs/CMS-IMPLEMENTATION.md for safe migration and bootstrap commands, backup requirements, private-network connection and CI preservation tests.
 
 ## Administrator bootstrap
-Set privately on the server: `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_INITIAL_PASSWORD` (14+ characters), optional `ADMIN_NAME`. After deploying code, run inside the app container:
-```bash
-npx prisma migrate deploy
-npm run db:seed-admin
-```
-The bootstrap is idempotent and does not reset an existing password. Remove `ADMIN_INITIAL_PASSWORD` immediately after success. Login: `/admin/login`. There is no public sign-up or reset form.
+Set DATABASE_URL, ADMIN_EMAIL, ADMIN_INITIAL_PASSWORD (14+ characters), and optional ADMIN_NAME only in a private operator environment. Run the seed script from the migration image after the database migration has been applied. The bootstrap is idempotent and does not reset an existing password. Remove ADMIN_INITIAL_PASSWORD immediately after success. Login: /admin/login. There is no public sign-up or reset form.
 
 ## Production rollout gates
-Back up and test restore PostgreSQL before migration. Persist and back up the Docker Compose `uploads_data` volume mounted at `/app/public/uploads`. Apply the additive migration deliberately during a maintenance window, then smoke-test sign-in, published news/events, attendee export, contact inbox and media upload over HTTPS. Keep PostgreSQL private and never commit credentials.
+Back up PostgreSQL and verify the archive before migration. Confirm a recent Lightsail snapshot. Persist and back up the Docker Compose uploads_data volume mounted at /app/public/uploads. Apply the additive migration deliberately during a maintenance window, then smoke-test sign-in, published news/events, attendee export, contact inbox and media upload over HTTPS. Verify existing event registrations remain present. Keep PostgreSQL private and never commit credentials.
 
-More detail: [CMS implementation](docs/CMS-IMPLEMENTATION.md), [Architecture](ARCHITECTURE.md), [Security](SECURITY.md).
+More detail: docs/CMS-IMPLEMENTATION.md, ARCHITECTURE.md, SECURITY.md.
