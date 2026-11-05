@@ -42,7 +42,7 @@ npm run db:seed-admin
 ```
 The bootstrap is idempotent and does not reset an existing password. Remove `ADMIN_INITIAL_PASSWORD` immediately after success. Login: `/admin/login`. There is no public sign-up or reset form.
 
-## Production gates
+## Production rollout gates
 Back up and test restore PostgreSQL before migration. Persist and back up the Docker Compose `uploads_data` volume mounted at `/app/public/uploads`. Apply the additive migration deliberately during a maintenance window, then smoke-test sign-in, published news/events, attendee export, contact inbox and media upload over HTTPS. Keep PostgreSQL private and never commit credentials.
 
 More detail: [CMS implementation](docs/CMS-IMPLEMENTATION.md), [Architecture](ARCHITECTURE.md), [Security](SECURITY.md).
