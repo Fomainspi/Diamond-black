@@ -2,8 +2,6 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_DB: diamond_black_dev
       POSTGRES_USER: diamondblack
@@ -19,11 +17,12 @@ services:
       retries: 10
 
   app:
-    image: fomawill/diamond-black-app:latest
+    image: ${APP_IMAGE:-fomawill/diamond-black-app:latest}
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env}
       NEWSLETTER_PROVIDER: ${NEWSLETTER_PROVIDER:-disabled}
       NEWSLETTER_API_KEY: ${NEWSLETTER_API_KEY:-}
       NEWSLETTER_AUDIENCE_ID: ${NEWSLETTER_AUDIENCE_ID:-}
@@ -38,6 +37,9 @@ services:
       - "3000"
     networks:
       - app-internal
+    depends_on:
+      db:
+        condition: service_healthy
     security_opt:
       - no-new-privileges:true
     read_only: true
