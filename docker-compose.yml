@@ -35,6 +35,8 @@ services:
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
       CONTACT_NOTIFICATION_EMAIL: ${CONTACT_NOTIFICATION_EMAIL:-}
       EVENT_NOTIFICATION_EMAIL: ${EVENT_NOTIFICATION_EMAIL:-}
+    volumes:
+      - uploads_data:/app/public/uploads
     expose: ["3000"]
     networks: [app-internal]
     depends_on:
@@ -64,3 +66,4 @@ volumes:
   caddy_data:
   caddy_config:
   postgres_data:
+  uploads_data:
