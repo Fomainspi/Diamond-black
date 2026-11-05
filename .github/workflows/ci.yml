@@ -2,7 +2,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, setup/secure-foundation, feature/application-foundation, feature/event-registration-database, feature/diamond-black-cms-foundation]
+    branches: [main, setup/secure-foundation, feature/application-foundation, feature/event-registration-database, feature/diamond-black-cms-foundation, fix/production-prisma-migration-runtime]
 permissions:
   contents: read
 concurrency:
@@ -20,6 +20,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://diamondblack:ci-placeholder@localhost:5432/diamond_black_dev
         run: npx prisma generate
       - name: Validate administrator bootstrap module
         run: node --experimental-strip-types --check prisma/seed-admin.ts
@@ -28,14 +30,61 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Build
+        env:
+          DATABASE_URL: postgresql://diamondblack:ci-placeholder@localhost:5432/diamond_black_dev
         run: npm run build
-      - name: Build production Docker image
-        run: docker build -t diamond-black-ci .
-      - name: Verify Prisma runtime in production image
+      - name: Build production web image
+        run: docker build --target runner -t diamond-black-ci-web .
+      - name: Verify Prisma web runtime dependencies
         run: |
-          docker run --rm --entrypoint sh diamond-black-ci -c '
+          docker run --rm --entrypoint sh diamond-black-ci-web -c '
             test -d /app/src/generated/prisma &&
             test -d /app/node_modules/@prisma/adapter-pg &&
             test -d /app/node_modules/pg &&
-            echo "Prisma and CMS runtime dependencies are present."
+            echo "Prisma Client and adapter are present in the web runtime."
           '
+      - name: Build dedicated database operations image
+        run: docker build --target migration -t diamond-black-ci-migration .
+      - name: Verify migrations and admin bootstrap against PostgreSQL
+        env:
+          DATABASE_URL: postgresql://diamondblack:ci-password@diamond-black-ci-db:5432/diamond_black_dev
+        run: |
+          set -euo pipefail
+          docker network create diamond-black-ci
+          cleanup() {
+            docker rm -f diamond-black-ci-db >/dev/null 2>&1 || true
+            docker network rm diamond-black-ci >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          docker run -d --name diamond-black-ci-db --network diamond-black-ci \
+            -e POSTGRES_DB=diamond_black_dev \
+            -e POSTGRES_USER=diamondblack \
+            -e POSTGRES_PASSWORD=ci-password \
+            postgres:16-alpine
+          ready=0
+          for attempt in $(seq 1 30); do
+            if docker exec diamond-black-ci-db pg_isready -U diamondblack -d diamond_black_dev; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = "1"
+          docker run --rm --network diamond-black-ci \
+            -e DATABASE_URL="$DATABASE_URL" \
+            diamond-black-ci-migration npx prisma migrate deploy
+          docker exec diamond-black-ci-db psql -U diamondblack -d diamond_black_dev -v ON_ERROR_STOP=1 -c \
+            "INSERT INTO \"EventRegistration\" (id, \"fullName\", email, phone, guests, consent, \"eventName\", status, \"confirmationEmail\", \"notificationEmail\", \"createdAt\", \"updatedAt\") VALUES ('ci-preservation-check', 'CI Preservation Check', 'ci@example.invalid', '0000000000', 1, true, 'CI Test', 'CONFIRMED', 'PENDING', 'PENDING', NOW(), NOW());"
+          docker run --rm --network diamond-black-ci \
+            -e DATABASE_URL="$DATABASE_URL" \
+            diamond-black-ci-migration npx prisma migrate deploy
+          docker run --rm --network diamond-black-ci \
+            -e DATABASE_URL="$DATABASE_URL" \
+            -e ADMIN_EMAIL=ci-admin@example.invalid \
+            -e ADMIN_NAME="CI Administrator" \
+            -e ADMIN_INITIAL_PASSWORD=ci-test-password-strong-123 \
+            diamond-black-ci-migration node --experimental-strip-types prisma/seed-admin.ts
+          docker exec diamond-black-ci-db psql -U diamondblack -d diamond_black_dev -Atc \
+            "SELECT count(*) FROM \"AdminUser\" WHERE email='ci-admin@example.invalid' AND role='SUPER_ADMIN';" | grep -qx 1
+          docker exec diamond-black-ci-db psql -U diamondblack -d diamond_black_dev -Atc \
+            "SELECT count(*) FROM \"EventRegistration\" WHERE id='ci-preservation-check';" | grep -qx 1
