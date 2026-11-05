@@ -8,6 +8,7 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN DATABASE_URL="postgresql://diamondblack:build-placeholder@localhost:5432/diamond_black_dev" npx prisma generate
 RUN npm run build
 
 FROM node:22-alpine AS runner
