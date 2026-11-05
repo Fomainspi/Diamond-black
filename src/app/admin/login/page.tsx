@@ -1,3 +1,3 @@
-import {loginAdmin} from "@/app/admin/actions";import "../admin.css";
+import {loginAdmin} from "@/app/admin/(protected)/actions";import "../admin.css";
 export const metadata={title:"Admin sign in"};
 export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){const p=await searchParams;return <main className="admin-login"><form action={loginAdmin}><span className="eyebrow">Diamond Black Corporation</span><h1>Administrator sign in</h1><p className="admin-muted">Private management area. Public visitor accounts are not available.</p>{p.error&&<p role="alert">Email or password is incorrect.</p>}<label>Email address<input type="email" name="email" autoComplete="username" required maxLength={254}/></label><label>Password<input type="password" name="password" autoComplete="current-password" required maxLength={200}/></label><button className="admin-button">Sign in securely</button></form></main>;}
