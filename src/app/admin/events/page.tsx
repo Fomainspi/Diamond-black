@@ -1,2 +1,17 @@
-import Link from "next/link";import {getPrismaClient} from "@/lib/prisma";
-export default async function Events(){const [items,count]=await Promise.all([getPrismaClient().managedEvent.findMany({orderBy:{startsAt:"desc"}}),getPrismaClient().eventRegistration.count()]);return <><div className="admin-toolbar"><div><span className="eyebrow">Programming</span><h1>Events</h1><p className="admin-muted">{count} existing registrations remain preserved.</p></div><Link className="admin-button" href="/admin/events/new">Create event</Link></div><table className="admin-table"><thead><tr><th>Event</th><th>Date</th><th>Status</th><th>Registration</th></tr></thead><tbody>{items.map(e=><tr key={e.id}><td><Link className="admin-link" href={"/admin/events/"+e.id}>{e.title}</Link></td><td>{e.startsAt.toLocaleString()}</td><td>{e.status}</td><td>{e.registrationEnabled?"Open":"Closed"}</td></tr>)}</tbody></table>{!items.length&&<p className="admin-empty">No managed events yet.</p>}</>;}
+import Link from "next/link";
+import { getPrismaClient } from "@/lib/prisma";
+export default async function Events() {
+  const [items, count] = await Promise.all([
+    getPrismaClient().managedEvent.findMany({ orderBy: { startsAt: "desc" } }),
+    getPrismaClient().eventRegistration.count(),
+  ]);
+  return (
+    <>
+      <div className="admin-toolbar"><div><span className="eyebrow">Programming</span><h1>Events</h1><p className="admin-muted">{count} existing registrations remain preserved.</p></div><Link className="admin-button" href="/admin/events/new">Create event</Link></div>
+      <table className="admin-table"><thead><tr><th>Event</th><th>Date</th><th>Status</th><th>Registration</th></tr></thead>
+        <tbody>{items.map((event) => <tr key={event.id}><td><Link className="admin-link" href={"/admin/events/" + event.id}>{event.title}</Link></td><td>{event.startsAt.toLocaleString()}</td><td>{event.status}</td><td>{event.registrationEnabled ? "Open" : "Closed"}</td></tr>)}</tbody>
+      </table>
+      {!items.length && <p className="admin-empty">No managed events yet.</p>}
+    </>
+  );
+}
