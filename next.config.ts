@@ -10,6 +10,15 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
+  // Prisma's generated client and PostgreSQL adapter are runtime dependencies
+  // of the event-registration route. Include them explicitly in standalone output.
+  outputFileTracingIncludes: {
+    "/api/events/register": [
+      "./src/generated/prisma/**/*",
+      "./node_modules/@prisma/**/*",
+      "./node_modules/pg/**/*"
+    ]
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   }
