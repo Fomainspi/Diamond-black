@@ -35,6 +35,7 @@ jobs:
             test -d /app/src/generated/prisma &&
             test -d /app/node_modules/@prisma/adapter-pg &&
             test -d /app/node_modules/pg &&
-            test -d /app/node_modules/bcryptjs &&
-            echo "Prisma and CMS dependencies are present."
+            test -d /app/node_modules/pg &&
+            test -f /app/prisma/seed-admin.mjs &&
+            echo "Prisma and CMS runtime dependencies are present."
           '
