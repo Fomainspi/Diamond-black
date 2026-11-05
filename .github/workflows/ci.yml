@@ -21,6 +21,8 @@ jobs:
         run: npm ci
       - name: Generate Prisma Client
         run: npx prisma generate
+      - name: Validate administrator bootstrap module
+        run: node --experimental-strip-types --check prisma/seed-admin.ts
       - name: Type-check
         run: npm run typecheck
       - name: Lint
@@ -36,6 +38,5 @@ jobs:
             test -d /app/node_modules/@prisma/adapter-pg &&
             test -d /app/node_modules/pg &&
             test -d /app/node_modules/pg &&
-            test -f /app/prisma/seed-admin.mjs &&
             echo "Prisma and CMS runtime dependencies are present."
           '
