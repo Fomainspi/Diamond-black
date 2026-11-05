@@ -3,7 +3,7 @@
 **Last reviewed: 6 November 2026**
 
 ## Current implementation status
-The public website is deployed on Amazon Lightsail. The production stack includes Next.js, PostgreSQL 16, Docker Compose and Caddy. Public event registration persists to PostgreSQL and transactional email delivery has been verified. The private CMS is a planned milestone; it is not implemented or deployed. There is currently no administrator login.
+The public website is deployed on Amazon Lightsail. The production stack includes Next.js, PostgreSQL 16, Docker Compose and Caddy. Public event registration persists to PostgreSQL and transactional email delivery has been verified. The private CMS foundation is implemented on the feature branch and submitted for merge. It is not yet deployed to production; production currently has no initialized CMS administrator until the database migration and one-time admin bootstrap are deliberately run.
 
 ## Product scope
 The public website promotes Diamond Black Corporation's entrepreneurship, innovation, talent, networking, digital marketing, audiovisual production and corporate events. Public visitors can browse public content, view events/news, subscribe to the newsletter and register for events. Public account creation, member profiles and public login are out of scope.
@@ -44,8 +44,8 @@ Next.js 16.4, React 19, TypeScript, PostgreSQL 16, Prisma 7, `@prisma/adapter-pg
 
 The browser calls server-side Next.js routes and never connects directly to PostgreSQL.
 
-## Implemented database model
-The current Prisma schema contains one implemented application model: `EventRegistration`.
+## Database models
+The existing `EventRegistration` model is in production. The feature branch adds CMS models through a separate, additive migration; those CMS tables do not exist in production until the migration is applied. The CMS models include `AdminUser`, `AdminSession`, `ContentEntry`, `ManagedEvent`, `ContactMessage`, `MediaAsset`, `SiteSetting` and `AuditLog`.
 
 | Field | Purpose |
 |---|---|
@@ -86,12 +86,12 @@ The deployed Titan SMTP configuration has been tested for attendee confirmation 
 
 The route validates email and consent, checks origin/host, applies a basic in-memory rate limit and honeypot, then creates a Mailchimp audience member with `status: pending`. The contact must complete provider confirmation. Newsletter subscribers are held by Mailchimp, not duplicated in the local PostgreSQL schema.
 
-## Planned CMS architecture
-The CMS will remain part of this Next.js modular monolith and use the existing PostgreSQL database. Public visitors will not create accounts. The first release is for one administrator, with an extensible design for additional administrators and roles.
+## Implemented CMS foundation (feature branch)
+The CMS remains part of this Next.js modular monolith and uses the existing PostgreSQL database. Public visitors do not create accounts. The first release provisions one administrator through an explicit seed command; the schema supports future SUPER_ADMIN and EDITOR roles.
 
-Planned modules: protected `/admin` and administrator authentication; dashboard; content/page publishing; event management; private registration search/filter and CSV export; contact inbox; validated media library; site settings; Mailchimp-integrated newsletter management; and audit log.
+Implemented modules: protected `/admin` dashboard and authentication; content/article editing and public news rendering; managed event creation and public event listing; private registration search/status/CSV export; contact form intake and inbox; validated image media library; site settings; and an administrator audit log. Newsletter audience subscription remains handled by the existing Mailchimp integration.
 
-Planned entities include administrator accounts/sessions, content, managed events, contact messages, media metadata, site settings and audit records. These are future design targets, not current database tables. The CMS must preserve the existing `EventRegistration` model and data.
+The feature branch adds administrator accounts/sessions, content, managed events, contact messages, media metadata, site settings and audit records. The additive migration preserves the existing `EventRegistration` schema and all current rows. Production remains on the prior schema until a controlled migration rollout.
 
 ## Security requirements
 - No public account registration.
