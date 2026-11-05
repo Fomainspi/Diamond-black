@@ -3,7 +3,7 @@
 **Last reviewed: 6 November 2026**
 
 ## Current implementation status
-The public website is deployed on Amazon Lightsail. The production stack includes Next.js, PostgreSQL 16, Docker Compose and Caddy. Public event registration persists to PostgreSQL and transactional email delivery has been verified. The private CMS foundation is implemented on the feature branch and submitted for merge. It is not yet deployed to production; production currently has no initialized CMS administrator until the database migration and one-time admin bootstrap are deliberately run.
+The public website is deployed on Amazon Lightsail. The production stack includes Next.js, PostgreSQL 16, Docker Compose and Caddy. Public event registration persists to PostgreSQL and transactional email delivery has been verified. The private CMS foundation has been merged into `main`. It is not yet deployed to production; production currently has no initialized CMS administrator until the database migration and one-time admin bootstrap are deliberately run.
 
 ## Product scope
 The public website promotes Diamond Black Corporation's entrepreneurship, innovation, talent, networking, digital marketing, audiovisual production and corporate events. Public visitors can browse public content, view events/news, subscribe to the newsletter and register for events. Public account creation, member profiles and public login are out of scope.
@@ -45,7 +45,7 @@ Next.js 16.4, React 19, TypeScript, PostgreSQL 16, Prisma 7, `@prisma/adapter-pg
 The browser calls server-side Next.js routes and never connects directly to PostgreSQL.
 
 ## Database models
-The existing `EventRegistration` model is in production. The feature branch adds CMS models through a separate, additive migration; those CMS tables do not exist in production until the migration is applied. The CMS models include `AdminUser`, `AdminSession`, `ContentEntry`, `ManagedEvent`, `ContactMessage`, `MediaAsset`, `SiteSetting` and `AuditLog`.
+The existing `EventRegistration` model is in production. The merged application adds CMS models through a separate, additive migration; those CMS tables do not exist in production until the migration is applied. The CMS models include `AdminUser`, `AdminSession`, `ContentEntry`, `ManagedEvent`, `ContactMessage`, `MediaAsset`, `SiteSetting` and `AuditLog`.
 
 | Field | Purpose |
 |---|---|
