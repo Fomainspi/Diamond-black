@@ -1,0 +1,27 @@
+import { notFound } from "next/navigation";
+import { getPrismaClient } from "@/lib/prisma";
+import { saveContent } from "@/lib/admin-actions";
+
+export default async function EditContent({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const item = id === "new" ? null : await getPrismaClient().contentEntry.findUnique({ where: { id } });
+  if (id !== "new" && !item) notFound();
+
+  return (
+    <>
+      <span className="eyebrow">Publishing</span>
+      <h1>{item ? "Edit content" : "Create content"}</h1>
+      <form className="admin-form" action={saveContent}>
+        {item && <input type="hidden" name="id" value={item.id} />}
+        <label>Type<select name="type" defaultValue={item?.type ?? "ARTICLE"}><option value="ARTICLE">Article / News</option><option value="PAGE">Page content</option></select></label>
+        <label>Title<input name="title" required minLength={3} maxLength={180} defaultValue={item?.title} /></label>
+        <label>Slug<input name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" defaultValue={item?.slug} placeholder="company-announcement" /></label>
+        <label>Excerpt<input name="excerpt" maxLength={500} defaultValue={item?.excerpt ?? ""} /></label>
+        <label>Cover image URL<input name="coverImage" maxLength={1000} defaultValue={item?.coverImage ?? ""} /></label>
+        <label>Body<textarea name="body" required maxLength={50000} defaultValue={item?.body ?? ""} /></label>
+        <label>Status<select name="status" defaultValue={item?.status ?? "DRAFT"}><option>DRAFT</option><option>PUBLISHED</option><option>ARCHIVED</option></select></label>
+        <button className="admin-button">Save content</button>
+      </form>
+    </>
+  );
+}

@@ -1,0 +1,4 @@
+import {getPrismaClient} from "@/lib/prisma";
+import SettingsEditor from "./settings-editor";
+const defaults=[["site.name","Diamond Black Corporation"],["site.tagline","Build • Innovate • Expand"],["contact.email","sales.diamondblack2026@gmail.com"],["contact.phone","+63 6969 211 6424"],["contact.address","29F High Street South Corporate Plaza Tower 2, Taguig City, Philippines"],["social.facebook","https://www.facebook.com/profile.php?id=61594570287188"],["social.youtube",""]];
+export default async function Settings(){const saved=await getPrismaClient().siteSetting.findMany(),values=new Map(saved.map(s=>[s.key,s.value])),initial=defaults.map(([key,value])=>({key,value:values.get(key)??value}));return <><span className="eyebrow">Configuration</span><h1>Site settings</h1><p className="admin-muted">Manage organisation details and public social links.</p><SettingsEditor initial={initial}/></>;}

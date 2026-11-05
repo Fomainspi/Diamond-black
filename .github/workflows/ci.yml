@@ -1,57 +1,41 @@
 name: CI
-
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - setup/secure-foundation
-      - feature/application-foundation
-      - feature/event-registration-database
-
+    branches: [main, setup/secure-foundation, feature/application-foundation, feature/event-registration-database, feature/diamond-black-cms-foundation]
 permissions:
   contents: read
-
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - name: Install dependencies
         run: npm ci
-
       - name: Generate Prisma Client
         run: npx prisma generate
-
+      - name: Validate administrator bootstrap module
+        run: node --experimental-strip-types --check prisma/seed-admin.ts
       - name: Type-check
         run: npm run typecheck
-
       - name: Lint
         run: npm run lint
-
       - name: Build
         run: npm run build
-
       - name: Build production Docker image
         run: docker build -t diamond-black-ci .
-
       - name: Verify Prisma runtime in production image
         run: |
           docker run --rm --entrypoint sh diamond-black-ci -c '
             test -d /app/src/generated/prisma &&
             test -d /app/node_modules/@prisma/adapter-pg &&
             test -d /app/node_modules/pg &&
-            echo "Prisma Client, PostgreSQL adapter, and pg driver are present."
+            echo "Prisma and CMS runtime dependencies are present."
           '
