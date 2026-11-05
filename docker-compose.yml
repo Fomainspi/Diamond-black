@@ -8,14 +8,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - app-internal
+    networks: [app-internal]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U diamondblack -d diamond_black_dev"]
+      test: ["CMD-SHELL","pg_isready -U diamondblack -d diamond_black_dev"]
       interval: 5s
       timeout: 3s
       retries: 10
-
   app:
     image: ${APP_IMAGE:-fomawill/diamond-black-app:latest}
     restart: unless-stopped
@@ -23,6 +21,9 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_NAME: ${ADMIN_NAME:-Diamond Black Administrator}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
       NEWSLETTER_PROVIDER: ${NEWSLETTER_PROVIDER:-disabled}
       NEWSLETTER_API_KEY: ${NEWSLETTER_API_KEY:-}
       NEWSLETTER_AUDIENCE_ID: ${NEWSLETTER_AUDIENCE_ID:-}
@@ -32,45 +33,33 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Diamond Black Corporation}
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-}
+      CONTACT_NOTIFICATION_EMAIL: ${CONTACT_NOTIFICATION_EMAIL:-}
       EVENT_NOTIFICATION_EMAIL: ${EVENT_NOTIFICATION_EMAIL:-}
-    expose:
-      - "3000"
-    networks:
-      - app-internal
+    expose: ["3000"]
+    networks: [app-internal]
     depends_on:
       db:
         condition: service_healthy
-    security_opt:
-      - no-new-privileges:true
+    security_opt: [no-new-privileges:true]
     read_only: true
-    tmpfs:
-      - /tmp
-      - /app/.next/cache
+    tmpfs: [/tmp,/app/.next/cache]
     init: true
-
   caddy:
     image: caddy:2-alpine
     environment:
       ACME_EMAIL: ${ACME_EMAIL}
       SITE_ADDRESS: ${SITE_ADDRESS}
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+    ports: ["80:80","443:443","443:443/udp"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    networks:
-      - app-internal
-    depends_on:
-      - app
-
+    networks: [app-internal]
+    depends_on: [app]
 networks:
   app-internal:
     driver: bridge
-
 volumes:
   caddy_data:
   caddy_config:

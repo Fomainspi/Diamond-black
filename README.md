@@ -1,83 +1,48 @@
-# Diamond Black Corporation Website
+# Diamond Black Corporation Website & CMS
 
 **Build • Innovate • Expand**
 
-A Next.js corporate website for Diamond Black Corporation.
+Production website: https://diamondblack-ph.com  
+Repository: https://github.com/Fomainspi/Diamond-black
 
-> **Status — 6 November 2026:** The public website is deployed on Amazon Lightsail. PostgreSQL persistence and public event registration are implemented and working in production. Transactional event emails have been verified. The private CMS is planned but is not yet implemented or deployed.
+## Application
+Next.js 16.4, React 19, TypeScript, Prisma 7, PostgreSQL 16, Docker Compose and Caddy. The public site and CMS run in the same application; administration is under `/admin`.
 
-## Live services
-- Website: https://diamondblack-ph.com
-- Event registration: https://diamondblack-ph.com/events/register
-- Repository: https://github.com/Fomainspi/Diamond-black
+## Public website
+Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Public event registration is available at `/events/register`, stored in PostgreSQL through the existing `EventRegistration` table. SMTP confirmation/notification outcomes are stored separately. Newsletter signup integrates with Mailchimp pending/double opt-in.
 
-## Implemented: public event registration
-The 100 People · One Night registration form is available at `/events/register` and submits to `POST /api/events/register`.
+## CMS modules
+- One initial administrator, provisioned through a controlled seed command. No public visitor signup.
+- Protected sign-in/out with bcrypt password hashes and opaque session tokens in HTTP-only, SameSite cookies.
+- Dashboard metrics and audit activity.
+- News/article and reusable page content with draft/published/archived state.
+- Event management.
+- Private attendee search, status updates and authenticated CSV export.
+- Contact inbox and public enquiry persistence API.
+- Media library (JPEG/PNG/WebP/GIF, 5 MB maximum).
+- Site settings and audit log.
 
-The server checks the request origin/host and size, applies a basic in-memory rate limit and honeypot, validates required fields, email format, attendee count and consent, then saves the registration to PostgreSQL through Prisma. It subsequently attempts the attendee confirmation and administrator notification independently through SMTP. Each email outcome is stored separately as `PENDING`, `SENT` or `FAILED`; a failed email does not discard a saved registration.
+## Database
+PostgreSQL 16 through Prisma 7 and `@prisma/adapter-pg`. CMS tables are introduced through additive migration `20261106003000_cms_foundation`; existing EventRegistration rows are not altered or deleted.
 
-Registration data is private server-side data. There is currently no public endpoint that lists registrations and no CMS interface for browsing them.
-
-## Implemented: database
-- PostgreSQL 16 (Alpine container image).
-- Prisma 7 with `@prisma/adapter-pg` and the `pg` driver.
-- Prisma schema: [`prisma/schema.prisma`](prisma/schema.prisma).
-- Initial migration: [`prisma/migrations/20261017235123_create_event_registration/migration.sql`](prisma/migrations/20261017235123_create_event_registration/migration.sql).
-- Current implemented model: `EventRegistration`.
-- Production database name: `diamond_black_dev`; configured application user: `diamondblack`.
-- The app connects internally to `db:5432` on a private Docker network. PostgreSQL is not exposed through a public host port.
-- Docker named volume `postgres_data` persists database files across normal container recreation. A persistent volume is not a backup; independent backups and restore tests must be verified separately.
-
-See [`docs/PRODUCTION-OPERATIONS.md`](docs/PRODUCTION-OPERATIONS.md) for safe inspection commands and operational guidance.
-
-## Implemented: newsletter
-`POST /api/newsletter` validates email and consent, performs basic origin/rate-limit/honeypot checks, and submits to Mailchimp using pending/double-opt-in status. Newsletter contacts are stored by Mailchimp, not duplicated in the local PostgreSQL database.
-
-## Production architecture
-The deployed stack runs on Amazon Lightsail (Ubuntu 24.04) using Docker Compose:
-- Next.js standalone application container.
-- PostgreSQL 16 container with persistent `postgres_data` volume.
-- Caddy reverse proxy for HTTPS and application routing.
-- Private Docker bridge network for application/database communication.
-- Titan SMTP for transactional event email.
-
-The application uses server-side Next.js routes; the browser never connects directly to PostgreSQL. Runtime credentials are supplied through the private server environment and must never be committed or shared.
-
-## Technology
-Next.js 16.4, React 19, TypeScript, Prisma 7, PostgreSQL 16, Docker Compose, Caddy, Nodemailer, Mailchimp API and GitHub Actions.
-
-## CMS roadmap — not implemented yet
-The next milestone is a private CMS. Public visitors will not have accounts. The first release will support one administrator, with an extensible design for additional administrators/roles later.
-
-Planned modules: secure sign-in/sign-out and protected admin routes; dashboard; content/page publishing; event management; private registration search/filter and CSV export; contact inbox; media library; site settings; Mailchimp-integrated newsletter management; and audit records.
-
-**There is no administrator login or deployed CMS yet.** Scope and progress are tracked in [`docs/CMS-IMPLEMENTATION.md`](docs/CMS-IMPLEMENTATION.md).
-
-## CI and development
-GitHub Actions installs dependencies, generates Prisma Client, runs type-checking and ESLint, builds Next.js and the Docker image, and checks that Prisma runtime dependencies are included.
-
-Use Node.js 22:
-
+## Local development
+Use Node.js 22 and a separate development database:
 ```bash
 npm ci
 npx prisma generate
 npm run dev
 ```
+Checks: `npm run typecheck`, `npm run lint`, `npm run build`.
 
-Before submitting changes:
-
+## Initial administrator
+Set only in the private server environment: `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_INITIAL_PASSWORD` (at least 14 characters), optional `ADMIN_NAME`. In the app container after deploying the approved image:
 ```bash
-npm run typecheck
-npm run lint
-npm run build
+npx prisma migrate deploy
+npm run db:seed-admin
 ```
+The seed is idempotent and does not reset an existing password. Remove `ADMIN_INITIAL_PASSWORD` immediately after successful provisioning. Login: `/admin/login`.
 
-Use a development-only database locally. Never use production credentials or data for local development. Database changes must include reviewed Prisma migrations; do not run unreviewed migrations against production.
+## Production controls
+Back up and test restore PostgreSQL before applying the migration. Persist and back up `public/uploads` for media. Apply migrations deliberately during a maintenance window and test admin login, content publishing, registrations, contact messages and image uploads over HTTPS. Never expose PostgreSQL publicly or commit secrets/production data.
 
-## Documentation
-- [Architecture](ARCHITECTURE.md)
-- [Security policy](SECURITY.md)
-- [Production database and event registration runbook](docs/PRODUCTION-OPERATIONS.md)
-- [CMS implementation scope](docs/CMS-IMPLEMENTATION.md)
-
-The original hosting budget target is US$25/month; review actual pricing before adding infrastructure or paid services.
+Documentation: [Architecture](ARCHITECTURE.md) · [Security](SECURITY.md) · [Production operations](docs/PRODUCTION-OPERATIONS.md) · [CMS implementation](docs/CMS-IMPLEMENTATION.md)
