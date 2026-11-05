@@ -78,7 +78,8 @@ export default function HomePage() {
             </div>
             <div className="event-details">
               <div><span className="eyebrow">Saturday · 14 November 2026</span><h3>19H – 03H · Manila, Philippines</h3></div>
-              <p>Event details and registration information will be published here when the official registration destination is confirmed.</p>
+              <p>Join us for an evening of meaningful connections, conversations, and new business opportunities.</p>
+              <div className="event-actions"><Link className="button" href="/events/register">Register Now</Link><Link className="button button-secondary" href="/events">Event Details</Link></div>
             </div>
           </div>
         </section>
