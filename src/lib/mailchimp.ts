@@ -20,9 +20,15 @@ type SearchResponse = { exact_matches?: { members?: MailchimpMember[] }; full_se
 function configuration() {
   const apiKey = process.env.NEWSLETTER_API_KEY;
   const audienceId = process.env.NEWSLETTER_AUDIENCE_ID;
-  const dataCenter = apiKey?.match(/-([a-z]\d+)$/i)?.[1]?.toLowerCase();
-  if (process.env.NEWSLETTER_PROVIDER?.toLowerCase() !== "mailchimp" || !apiKey || !audienceId || !dataCenter) {
-    throw new Error("Mailchimp is not configured. Set NEWSLETTER_PROVIDER=mailchimp, NEWSLETTER_API_KEY and NEWSLETTER_AUDIENCE_ID on the server.");
+  // Prefer an explicit data-center setting. Fall back to the suffix on existing
+  // Mailchimp API keys so current deployments remain backwards compatible.
+  const configuredDataCenter = process.env.NEWSLETTER_DATA_CENTER?.trim().toLowerCase();
+  const keyDataCenter = apiKey?.match(/-([a-z]\d+)$/i)?.[1]?.toLowerCase();
+  const dataCenter = configuredDataCenter || keyDataCenter;
+  const validDataCenter = Boolean(dataCenter && /^[a-z]\d+$/.test(dataCenter));
+
+  if (process.env.NEWSLETTER_PROVIDER?.toLowerCase() !== "mailchimp" || !apiKey || !audienceId || !validDataCenter) {
+    throw new Error("Mailchimp is not configured. Set NEWSLETTER_PROVIDER=mailchimp, NEWSLETTER_API_KEY, NEWSLETTER_AUDIENCE_ID and a valid NEWSLETTER_DATA_CENTER (for example, us20).");
   }
   return { apiKey, audienceId, baseUrl: `https://${dataCenter}.api.mailchimp.com/3.0` };
 }
