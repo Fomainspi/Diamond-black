@@ -14,6 +14,12 @@ RUN DATABASE_URL="postgresql://diamondblack:build-placeholder@localhost:5432/dia
     && test -d /app/node_modules/pg
 RUN npm run build
 
+# Operator-only image: contains source, migrations, Prisma CLI and bootstrap script.
+# It is separate from the lean web runtime and never runs automatically at app startup.
+FROM builder AS migration
+ENV NODE_ENV=production
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
