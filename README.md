@@ -21,6 +21,7 @@ Corporate pages: Home, About, Services, Events, News, Newsletter and Contact. Ev
 - Contact inbox and public contact submission API.
 - Image library with JPEG/PNG/WebP/GIF allow-list, 5 MB maximum and image-signature checks.
 - Organisation site settings.
+- Mailchimp newsletter audience view with subscriber search, status filters and pagination; Mailchimp remains the source of truth for contacts.
 
 ## Database
 Prisma 7 with PostgreSQL. Additive migration 20261106003000_cms_foundation creates CMS tables only. It does not alter or remove existing registrations. The Prisma datasource URL is configured in prisma.config.ts through DATABASE_URL.
