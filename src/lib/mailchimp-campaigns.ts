@@ -25,7 +25,7 @@ async function api<T>(path: string, method = "GET", body?: unknown): Promise<T> 
 const esc = (s: string) => s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]!));
 export function newsletterHtml(title: string, body: string) {
   const paragraphs = body.split(/\r?\n\s*\r?\n/).map(p => `<p style="font-size:16px;line-height:1.7;color:#292929;margin:0 0 18px">${esc(p).replace(/\r?\n/g,"<br>")}</p>`).join("");
-  return `<!doctype html><html><body style="margin:0;background:#f5f3ef;font-family:Arial,sans-serif"><div style="max-width:640px;margin:30px auto;background:#fff;padding:36px"><p style="letter-spacing:3px;color:#9b7b35;font-weight:bold">DIAMOND BLACK CORPORATION</p><h1 style="color:#171717;font-size:30px">${esc(title)}</h1>${paragraphs}<hr style="border:0;border-top:1px solid #ddd;margin:30px 0"><p style="font-size:12px;color:#777">You are receiving this email because you subscribed to Diamond Black updates. *|UNSUB|*</p></div></body></html>`;
+  return `<!doctype html><html><body style="margin:0;background:#f5f3ef;font-family:Arial,sans-serif"><div style="max-width:640px;margin:30px auto;background:#fff;padding:36px"><p style="letter-spacing:3px;color:#9b7b35;font-weight:bold">DIAMOND BLACK CORPORATION</p><h1 style="color:#171717;font-size:30px">${esc(title)}</h1>${paragraphs}<hr style="border:0;border-top:1px solid #ddd;margin:30px 0"><p style="font-size:12px;color:#777">You are receiving this email because you subscribed to Diamond Black updates.<br>*|LIST:ADDRESS|*<br><a href="*|UNSUB|*">Unsubscribe</a></p></div></body></html>`;
 }
 export async function createCampaign(input:{title:string;subject:string;preview:string;body:string;fromName:string;replyTo:string}) {
   const c=config();
