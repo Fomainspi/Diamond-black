@@ -17,7 +17,7 @@ export async function createNewsletterDraft(fd:FormData) {
   const admin=await requireAdmin();
   const parsed=campaignInput.safeParse(Object.fromEntries(fd));
   if(!parsed.success) throw new Error("Please check the newsletter fields and try again.");
-  const campaign=await createCampaign(parsed.data);
+  const campaign=await createCampaign({...parsed.data,preview:parsed.data.preview??""});
   await writeAudit(admin.id,"newsletter.draft.create","MailchimpCampaign",campaign.id,{subject:parsed.data.subject});
   revalidatePath("/admin/newsletter");
   redirect("/admin/newsletter?campaign="+encodeURIComponent(campaign.id));
