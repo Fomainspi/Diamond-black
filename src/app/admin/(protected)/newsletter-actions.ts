@@ -24,7 +24,7 @@ export async function createNewsletterDraft(fd:FormData) {
 }
 export async function sendNewsletterTest(fd:FormData) {
   const admin=await requireAdmin(),id=String(fd.get("campaignId")||""),email=String(fd.get("testEmail")||"");
-  if(!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(email)||id.length<3) throw new Error("Enter a valid test email address.");
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||id.length<3) throw new Error("Enter a valid test email address.");
   const campaign=await getCampaign(id);
   if(campaign.status==="sent") throw new Error("This campaign has already been sent.");
   await testCampaign(id,email);
