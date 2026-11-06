@@ -1,5 +1,5 @@
 "use server";
-import {mkdir,writeFile} from "node:fs/promises";
+import {mkdir,writeFile,unlink} from "node:fs/promises";
 import path from "node:path";
 import {randomUUID} from "node:crypto";
 import {revalidatePath} from "next/cache";
@@ -16,4 +16,16 @@ export async function uploadMedia(fd:FormData){
  const filename=randomUUID()+"."+ext,folder=path.join(process.cwd(),"public","uploads");await mkdir(folder,{recursive:true});await writeFile(path.join(folder,filename),data,{flag:"wx"});
  const url="/uploads/"+filename,asset=await getPrismaClient().mediaAsset.create({data:{filename,originalName:file.name.slice(0,255),mimeType:file.type,size:file.size,url,altText:String(fd.get("altText")||"").slice(0,300)||null}});
  await writeAudit(admin.id,"media.upload","MediaAsset",asset.id);revalidatePath("/admin/media");redirect("/admin/media");
+}
+export async function deleteMedia(fd:FormData) {
+ const admin=await requireAdmin(),id=String(fd.get("id")||""),db=getPrismaClient();
+ const asset=await db.mediaAsset.findUnique({where:{id}});if(!asset)throw new Error("Media asset not found.");
+ const [contentRefs,eventRefs]=await Promise.all([db.contentEntry.count({where:{OR:[{coverImage:asset.url},{body:{contains:asset.url}}]}}),db.managedEvent.count({where:{imageUrl:asset.url}})]);
+ if(contentRefs+eventRefs>0)throw new Error("This image is still referenced by content or an event. Replace those references before deleting it.");
+ const folder=path.resolve(process.cwd(),"public","uploads"),target=path.resolve(folder,asset.filename);
+ if(path.dirname(target)!==folder)throw new Error("Invalid media path.");
+ await db.mediaAsset.delete({where:{id}});
+ try{await unlink(target);}catch(error){console.error("Media file cleanup failed after database removal",error);}
+ await writeAudit(admin.id,"media.delete","MediaAsset",id,{filename:asset.filename});
+ revalidatePath("/admin/media");redirect("/admin/media");
 }

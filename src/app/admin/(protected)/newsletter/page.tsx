@@ -1,51 +1,27 @@
 import Link from "next/link";
-import { getMailchimpAudience, getMailchimpMembers } from "@/lib/mailchimp";
-
-type Props = { searchParams: Promise<{ page?: string; status?: string; q?: string }> };
-const date = (value?: string) => value ? new Date(value).toLocaleDateString() : "—";
-
-export default async function NewsletterAdmin({ searchParams }: Props) {
-  const params = await searchParams;
-  let audience;
-  let listing;
-  let error = "";
-  try {
-    [audience, listing] = await Promise.all([
-      getMailchimpAudience(),
-      getMailchimpMembers({ page: Number(params.page) || 1, status: params.status, search: params.q }),
-    ]);
-  } catch (cause) {
-    error = cause instanceof Error ? cause.message : "Unable to connect to Mailchimp.";
-  }
-
-  const status = params.status ?? "";
-  const q = params.q ?? "";
-  return <>
-    <div className="admin-toolbar"><div><span className="eyebrow">Communications</span><h1>Newsletter</h1><p className="admin-muted">Manage the audience connected to your existing Mailchimp account.</p></div><Link className="admin-link" href="/admin">Back to overview</Link></div>
-    {error ? <section className="admin-panel" style={{ marginTop: 20 }}><h2>Mailchimp connection unavailable</h2><p>{error}</p><p className="admin-muted">Configure the Mailchimp environment variables on the server. Credentials are never displayed here.</p></section> : <>
-      <div className="admin-grid">
-        <section className="admin-stat"><span className="admin-muted">Audience</span><strong style={{ fontSize: "1.3rem" }}>{audience?.name}</strong></section>
-        <section className="admin-stat"><span className="admin-muted">Subscribed contacts</span><strong>{audience?.stats?.member_count ?? 0}</strong></section>
-        <section className="admin-stat"><span className="admin-muted">Unsubscribed</span><strong>{audience?.stats?.unsubscribe_count ?? 0}</strong></section>
-        <section className="admin-stat"><span className="admin-muted">Cleaned addresses</span><strong>{audience?.stats?.cleaned_count ?? 0}</strong></section>
-      </div>
-      <section className="admin-panel">
-        <div className="admin-toolbar"><div><h2>Audience contacts</h2><p className="admin-muted">{listing?.total ?? 0} matching contacts · page {listing?.page ?? 1} of {listing?.pageCount ?? 1}</p></div><span className="admin-pill">Live Mailchimp data</span></div>
-        <form method="get" className="admin-actions" style={{ margin: "18px 0" }}>
-          <input name="q" defaultValue={q} placeholder="Search name or email" aria-label="Search name or email" />
-          <select name="status" defaultValue={status} aria-label="Filter by status"><option value="">All statuses</option><option value="subscribed">Subscribed</option><option value="pending">Pending confirmation</option><option value="unsubscribed">Unsubscribed</option><option value="cleaned">Cleaned</option></select>
-          <button className="admin-button">Apply filters</button>
-          {(q || status) && <Link className="admin-link" href="/admin/newsletter">Clear</Link>}
-        </form>
-        <div style={{ overflowX: "auto" }}><table className="admin-table"><thead><tr><th>Name</th><th>Email address</th><th>Status</th><th>Last changed</th></tr></thead><tbody>
-          {listing?.members.map((member) => <tr key={member.id}><td>{member.full_name || "—"}</td><td>{member.email_address}</td><td><span className="admin-pill">{member.status}</span></td><td>{date(member.last_changed)}</td></tr>)}
-          {!listing?.members.length && <tr><td colSpan={4}>No contacts found for these filters.</td></tr>}
-        </tbody></table></div>
-        <div className="admin-actions" style={{ marginTop: 18 }}>
-          {listing && listing.page > 1 ? <Link className="admin-link" href={`/admin/newsletter?page=${listing.page - 1}&status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`}>← Previous</Link> : <span />}
-          {listing && listing.page < listing.pageCount ? <Link className="admin-link" href={`/admin/newsletter?page=${listing.page + 1}&status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`}>Next →</Link> : <span />}
-        </div>
-      </section>
-    </>}
-  </>;
+import {getMailchimpAudience,getMailchimpMembers} from "@/lib/mailchimp";
+import {getCampaign} from "@/lib/mailchimp-campaigns";
+import {createNewsletterDraft,sendNewsletterTest,publishNewsletter} from "../newsletter-actions";
+type Props={searchParams:Promise<{page?:string;status?:string;q?:string;campaign?:string;tested?:string;sent?:string}>};
+const date=(value?:string)=>value?new Date(value).toLocaleDateString():"—";
+export default async function NewsletterAdmin({searchParams}:Props){
+ const params=await searchParams;let audience;let listing;let error="";let campaign;
+ try{[audience,listing]=await Promise.all([getMailchimpAudience(),getMailchimpMembers({page:Number(params.page)||1,status:params.status,search:params.q})]);if(params.campaign)campaign=await getCampaign(params.campaign);}
+ catch(cause){error=cause instanceof Error?cause.message:"Unable to connect to Mailchimp.";}
+ const status=params.status??"",q=params.q??"";
+ return <><div className="admin-toolbar"><div><span className="eyebrow">Communications</span><h1>Newsletter</h1><p className="admin-muted">Prepare, test and publish campaigns to your Mailchimp audience.</p></div><Link className="admin-link" href="/admin">Back to overview</Link></div>
+ {error?<section className="admin-panel"><h2>Mailchimp connection unavailable</h2><p>{error}</p><p className="admin-muted">Credentials remain server-side and are never displayed.</p></section>:<>
+ <div className="admin-grid"><section className="admin-stat"><span className="admin-muted">Audience</span><strong>{audience?.name}</strong></section><section className="admin-stat"><span className="admin-muted">Subscribed contacts</span><strong>{audience?.stats?.member_count??0}</strong></section><section className="admin-stat"><span className="admin-muted">Unsubscribed</span><strong>{audience?.stats?.unsubscribe_count??0}</strong></section><section className="admin-stat"><span className="admin-muted">Cleaned addresses</span><strong>{audience?.stats?.cleaned_count??0}</strong></section></div>
+ {params.sent==="1"&&<section className="admin-panel"><h2>Campaign send request accepted</h2><p>Check campaign reporting in Mailchimp. Acceptance does not guarantee inbox delivery.</p></section>}
+ <section className="admin-panel" style={{marginTop:20}}><h2>Create newsletter campaign</h2><p className="admin-muted">Saving creates a Mailchimp draft only. It does not send email.</p>
+ <form action={createNewsletterDraft} className="admin-form"><label>Campaign title<input name="title" required minLength={3} maxLength={180}/></label><label>Email subject<input name="subject" required minLength={3} maxLength={150}/></label><label>Preview text<input name="preview" maxLength={150}/></label><label>Sender name<input name="fromName" required defaultValue="Diamond Black Corporation" maxLength={100}/></label><label>Reply-to email<input name="replyTo" type="email" required maxLength={254} placeholder="Verified business email"/></label><label>Newsletter content<textarea name="body" required minLength={30} maxLength={20000} rows={12} placeholder="Separate paragraphs with a blank line."/></label><button className="admin-button">Save Mailchimp draft</button></form></section>
+ {campaign&&<section className="admin-panel" style={{marginTop:20}}><h2>Campaign review</h2><p><strong>Subject:</strong> {campaign.settings?.subject_line??"—"}</p><p><strong>Status:</strong> {campaign.status}</p><p className="admin-muted">Send a test to yourself and inspect the inbox before sending to subscribers.</p>
+ <form action={sendNewsletterTest} className="admin-actions"><input type="hidden" name="campaignId" value={campaign.id}/><input type="email" name="testEmail" required placeholder="Your test email address"/><button className="admin-button">Send test email</button></form>
+ {params.tested==="1"&&<p>Test request accepted. Check the test inbox and links.</p>}
+ <form action={publishNewsletter} className="admin-form" style={{marginTop:24}}><input type="hidden" name="campaignId" value={campaign.id}/><label>Type exactly: SEND TO ALL SUBSCRIBERS<input name="confirmation" required autoComplete="off" placeholder="SEND TO ALL SUBSCRIBERS"/></label><button className="admin-button" style={{background:"#8b2c22"}}>Send to all subscribed contacts</button></form></section>}
+ <section className="admin-panel" style={{marginTop:20}}><div className="admin-toolbar"><div><h2>Audience contacts</h2><p className="admin-muted">{listing?.total??0} matching contacts · page {listing?.page??1} of {listing?.pageCount??1}</p></div><span className="admin-pill">Live Mailchimp data</span></div>
+ <form method="get" className="admin-actions" style={{margin:"18px 0"}}><input name="q" defaultValue={q} placeholder="Search name or email"/><select name="status" defaultValue={status}><option value="">All statuses</option><option value="subscribed">Subscribed</option><option value="pending">Pending confirmation</option><option value="unsubscribed">Unsubscribed</option><option value="cleaned">Cleaned</option></select><button className="admin-button">Apply filters</button>{(q||status)&&<Link className="admin-link" href="/admin/newsletter">Clear</Link>}</form>
+ <div style={{overflowX:"auto"}}><table className="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Last changed</th></tr></thead><tbody>{listing?.members.map(m=><tr key={m.id}><td>{m.full_name||"—"}</td><td>{m.email_address}</td><td>{m.status}</td><td>{date(m.last_changed)}</td></tr>)}{!listing?.members.length&&<tr><td colSpan={4}>No contacts found.</td></tr>}</tbody></table></div>
+ <div className="admin-actions" style={{marginTop:18}}>{listing&&listing.page>1?<Link className="admin-link" href={`/admin/newsletter?page=${listing.page-1}&status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`}>← Previous</Link>:<span/>}{listing&&listing.page<listing.pageCount?<Link className="admin-link" href={`/admin/newsletter?page=${listing.page+1}&status=${encodeURIComponent(status)}&q=${encodeURIComponent(q)}`}>Next →</Link>:<span/>}</div></section>
+ </>}</>;
 }
