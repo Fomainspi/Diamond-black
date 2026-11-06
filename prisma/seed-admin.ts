@@ -2,7 +2,7 @@ import "dotenv/config";
 import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { promisify } from "node:util";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client.ts";
 
 const scrypt = promisify(scryptCallback);
 const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
