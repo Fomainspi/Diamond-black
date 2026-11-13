@@ -1,15 +1,6 @@
 import Link from "next/link";
 import NewsletterForm from "../components/NewsletterForm";
 import ServicesShowcase from "./services/ServicesShowcase";
-const services = [
-  { number: "01", title: "Strategic Networking", text: "Create meaningful connections that open doors to collaboration and business growth." },
-  { number: "02", title: "Digital Marketing", text: "Build a stronger brand presence through focused digital communication and campaigns." },
-  { number: "03", title: "Audiovisual Production", text: "Tell your story through thoughtful visual content and professional production." },
-  { number: "04", title: "Corporate Events", text: "Bring people together through experiences designed for connection and opportunity." },
-  { number: "05", title: "Business Development", text: "Support ideas and partnerships that help businesses innovate and expand." },
-  { number: "06", title: "Entrepreneurship", text: "Encourage entrepreneurial thinking, talent, and practical business collaboration." }
-];
-
 const newsPreview = [
   { label: "COMPANY", title: "Ideas, people, and opportunities", text: "Updates from the Diamond Black community will appear here." },
   { label: "INSIGHTS", title: "Building for what comes next", text: "Perspectives on business, innovation, and meaningful connections." },
@@ -35,7 +26,9 @@ export default function HomePage() {
       <main id="home">
         <section className="hero">
           <div className="hero-media" aria-hidden="true">
-            <img src="/images/diamond-black-primary.jpg" alt="" />
+            <video className="hero-video" autoPlay muted loop playsInline preload="metadata" poster="/images/diamond-black-primary.jpg">
+              <source src="/videos/diamond-black.mp4" type="video/mp4" />
+            </video>
           </div>
           <div className="hero-overlay" />
           <div className="container hero-content">
@@ -65,9 +58,7 @@ export default function HomePage() {
         <section className="section" id="services">
           <div className="container">
             <div className="section-heading"><span className="eyebrow">What We Do</span><h2>Built around opportunity.</h2><p className="lead">Services designed to help people and businesses make stronger connections and move ideas forward.</p></div>
-            <div className="grid">
-              {services.map((service) => <article className="card" key={service.number}><span className="card-number">{service.number}</span><h3>{service.title}</h3><p>{service.text}</p></article>)}
-            </div>
+            <ServicesShowcase />
           </div>
         </section>
 
