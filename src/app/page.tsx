@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NewsletterForm from "../components/NewsletterForm";
+import ServicesShowcase from "./services/ServicesShowcase";
 const services = [
   { number: "01", title: "Strategic Networking", text: "Create meaningful connections that open doors to collaboration and business growth." },
   { number: "02", title: "Digital Marketing", text: "Build a stronger brand presence through focused digital communication and campaigns." },
