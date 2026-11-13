@@ -1,2 +1,16 @@
 import Link from "next/link";
-export default function Page(){return <><header className="site-header"><div className="container header-inner"><Link className="brand" href="/"><img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></Link><nav className="nav"><Link href="/about">About</Link><Link href="/services">Services</Link><Link href="/events">Events</Link><Link href="/news">News</Link><Link href="/newsletter">Newsletter</Link><Link href="/contact">Contact</Link></nav></div></header><main><section className="page-hero"><div className="container"><span className="eyebrow">What We Do</span><h1>Services</h1></div></section><section className="section"><div className="container"><div className="grid">{[["01","Strategic Networking","Create meaningful connections that open doors to collaboration and growth."],["02","Digital Marketing","Build a stronger brand presence through focused digital communication."],["03","Audiovisual Production","Tell your story through thoughtful visual content and professional production."],["04","Corporate Events","Bring people together through experiences designed for connection."],["05","Business Development","Support ideas and partnerships that help businesses innovate and expand."],["06","Entrepreneurship","Encourage entrepreneurial thinking, talent, and practical collaboration."]].map(([n,t,x])=><article className="card" key={n}><span className="card-number">{n}</span><h3>{t}</h3><p>{x}</p></article>)}</div></div></section></main><footer className="site-footer"><div className="container footer-inner"><div className="footer-brand"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></div><div className="footer-tagline">BUILD • INNOVATE • EXPAND</div><div>© {new Date().getFullYear()} Diamond Black Corporation</div></div></footer></>}
+import ServicesShowcase from "./ServicesShowcase";
+
+export default function ServicesPage() {
+  return (
+    <>
+      <header className="site-header"><div className="container header-inner"><Link className="brand" href="/"><img className="brand-logo" src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" /></Link><nav className="nav" aria-label="Main navigation"><Link href="/about">About</Link><Link href="/services">Services</Link><Link href="/events">Events</Link><Link href="/news">News</Link><Link href="/newsletter">Newsletter</Link><Link href="/contact">Contact</Link></nav></div></header>
+      <main>
+        <section className="page-hero"><div className="container"><span className="eyebrow">What We Do</span><h1>Services</h1><p className="lead">Connecting people, strengthening brands, and creating opportunities for growth.</p></div></section>
+        <section className="section"><div className="container"><ServicesShowcase /></div></section>
+        <section className="section service-cta"><div className="container"><span className="eyebrow">Have an Opportunity in Mind?</span><h2>Let’s create something meaningful together.</h2><Link className="button" href="/contact">Talk to Diamond Black</Link></div></section>
+      </main>
+      <footer className="site-footer"><div className="container footer-inner"><div className="footer-brand"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation" /></div><div className="footer-tagline">BUILD • INNOVATE • EXPAND</div><div>© {new Date().getFullYear()} Diamond Black Corporation</div></div></footer>
+    </>
+  );
+}
