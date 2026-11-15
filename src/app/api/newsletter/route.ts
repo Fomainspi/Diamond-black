@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
 
   // Silently accept bot submissions without forwarding them to the mailing provider.
   if (typeof data.companyWebsite === "string" && data.companyWebsite.trim() !== "") {
-    return json("If the address can be subscribed, you’ll receive an email with the next step.", 200);
+    return json("Thank you. If your request is eligible, your newsletter subscription has been processed.", 200);
   }
 
   if (typeof data.email !== "string" || data.email.length > 254) {
@@ -89,30 +90,24 @@ export async function POST(request: Request) {
   }
 
   try {
+    const subscriberHash = createHash("md5").update(email).digest("hex");
     const response = await fetch(
-      `https://${dataCenter}.api.mailchimp.com/3.0/lists/${encodeURIComponent(audienceId)}/members`,
+      `https://${dataCenter}.api.mailchimp.com/3.0/lists/${encodeURIComponent(audienceId)}/members/${subscriberHash}`,
       {
-        method: "POST",
+        method: "PUT",
         headers: {
           Authorization: `Basic ${Buffer.from(`diamond-black:${apiKey}`).toString("base64")}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email_address: email, status: "pending" }),
+        body: JSON.stringify({ email_address: email, status: "subscribed" }),
         signal: AbortSignal.timeout(8000),
         cache: "no-store",
       },
     );
 
     if (response.ok) {
-      return json("Thank you. Please check your inbox and confirm your subscription to complete signup.", 200);
+      return json("Thank you. Your newsletter subscription is confirmed.", 200);
     }
-
-    const providerError = await response.json().catch(() => ({})) as { title?: string; detail?: string };
-    if (response.status === 400 && /member exists|already a member/i.test(providerError.title ?? "")) {
-      // Avoid disclosing whether an email address is already in the audience.
-      return json("If this address can be subscribed, you’ll receive an email with the next step.", 200);
-    }
-
     // Never return provider responses or credentials to the browser.
     return json("We couldn’t complete signup right now. Please try again later.", 502);
   } catch {
