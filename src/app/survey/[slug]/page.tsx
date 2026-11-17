@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getPrismaClient } from "@/lib/prisma";
 import SurveyForm from "@/components/SurveyForm";
 
@@ -12,10 +13,10 @@ export default async function PublicSurveyPage({params}:{params:Promise<{slug:st
  const version=survey?.versions[0];if(!survey||!version)notFound();
  const snapshot=version.snapshot as unknown as Snapshot;
  return <main className="survey-page"><div className="survey-card">
-  <header className="survey-header"><a href="/" aria-label="Diamond Black Corporation home"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></a>
+  <header className="survey-header"><Link href="/" aria-label="Diamond Black Corporation home"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></a>
    <span className="eyebrow">Diamond Black Corporation</span><h1>{snapshot.title}</h1>{snapshot.subtitle&&<p className="survey-subtitle">{snapshot.subtitle}</p>}
    <p className="survey-intro">{snapshot.description}</p><span className="survey-event">{snapshot.eventName}</span>
   </header>
   <SurveyForm slug={slug} sections={snapshot.sections} thankYou={snapshot.thankYou} privacyNotice={snapshot.privacyNotice}/>
- </div><footer className="survey-footer">© {new Date().getFullYear()} Diamond Black Corporation · <a href="/">Visit our website</a></footer></main>;
+ </div><footer className="survey-footer">© {new Date().getFullYear()} Diamond Black Corporation · <Link href="/">Visit our website</Link></footer></main>;
 }

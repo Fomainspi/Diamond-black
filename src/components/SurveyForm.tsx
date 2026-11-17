@@ -1,5 +1,6 @@
 "use client";
 import { useMemo,useState,type FormEvent } from "react";
+import Link from "next/link";
 type Q={id:string;title:string;description?:string|null;type:string;required:boolean;minValue?:number|null;maxValue?:number|null;options?:Array<{id:string;label:string;value:string}>};
 type S={id:string;title:string;description?:string|null;questions:Q[]};
 export default function SurveyForm({slug,sections,thankYou,privacyNotice}:{slug:string;sections:S[];thankYou:string;privacyNotice?:string|null}){
@@ -16,7 +17,7 @@ export default function SurveyForm({slug,sections,thankYou,privacyNotice}:{slug:
   if(result.newsletterRequested){try{await fetch("/api/newsletter",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:newsletterEmail,consent:true,companyWebsite:""})});}catch{/* Survey response remains saved if newsletter is unavailable. */}}
   setDone(true);
  }catch(e){setError(e instanceof Error?e.message:"We could not submit your response.");}finally{setBusy(false);}}
- if(done)return <section className="survey-thanks"><span className="eyebrow">Response received</span><h2>Thank you.</h2><p>{thankYou}</p><a className="survey-submit" href="/">Return to Diamond Black</a></section>;
+ if(done)return <section className="survey-thanks"><span className="eyebrow">Response received</span><h2>Thank you.</h2><p>{thankYou}</p><Link className="survey-submit" href="/">Return to Diamond Black</Link></section>;
  const newsletterQuestion=questions.find(q=>/receive updates|newsletter/i.test(q.title));
  return <form className="survey-form" onSubmit={submit}>
   <div className="survey-progress"><div><span>Section {step+1} of {sections.length}</span><span>{progress}%</span></div><span className="survey-progress-track"><span style={{width:progress+"%"}}/></span></div>
