@@ -146,7 +146,27 @@ export async function createInitialEventSurvey() {
   description:"Thank you for being part of 100 People One Night! We are grateful that you joined us and contributed to making this event memorable. At Diamond Black Corporation, we believe that meaningful connections, shared experiences, and community engagement are essential to building something great. Your feedback matters. Please take a few minutes to share your experience and help us improve future events.",
   thankYou:"Thank you for taking the time to share your experience. Your feedback will help Diamond Black Corporation create even more meaningful events and opportunities.",
   privacyNotice:"Your responses are used by Diamond Black Corporation to evaluate and improve our events. Newsletter subscription is optional and requires your separate consent.",
-  sections:{create:groups.map((g,si)=>({title:g.title,sortOrder:si,questions:{create:g.items.map((q,qi)=>({title:q[0],type:q[1] as never,required:q[2],sortOrder:qi,options:{create:q[3].map((label,oi)=>({label,value:label,sortOrder:oi}))}}))}})}
+  sections: {
+    create: groups.map((group, sectionIndex) => ({
+      title: group.title,
+      sortOrder: sectionIndex,
+      questions: {
+        create: group.items.map((item, questionIndex) => ({
+          title: item[0],
+          type: item[1] as never,
+          required: item[2],
+          sortOrder: questionIndex,
+          options: {
+            create: item[3].map((label, optionIndex) => ({
+              label,
+              value: label,
+              sortOrder: optionIndex,
+            })),
+          },
+        })),
+      },
+    })),
+  },
  }});
  await writeAudit(admin.id,"survey.create.initial","Survey",survey.id);revalidatePath("/admin/surveys");redirect(`/admin/surveys/${survey.id}`);
 }
@@ -161,6 +181,43 @@ export async function duplicateSurvey(formData:FormData){
  const source=await db.survey.findUnique({where:{id},include:{sections:{orderBy:{sortOrder:"asc"},include:{questions:{orderBy:{sortOrder:"asc"},include:{options:{orderBy:{sortOrder:"asc"}}}}}}}});
  if(!source)redirect("/admin/surveys");
  const slug=`${source.slug}-copy-${Date.now().toString().slice(-6)}`;
- const copy=await db.survey.create({data:{title:`${source.title} (Copy)`,slug,eventName:source.eventName,subtitle:source.subtitle,description:source.description,thankYou:source.thankYou,privacyNotice:source.privacyNotice,status:"DRAFT",sections:{create:source.sections.map(s=>({title:s.title,description:s.description,sortOrder:s.sortOrder,questions:{create:s.questions.map(q=>({title:q.title,description:q.description,type:q.type,required:q.required,enabled:q.enabled,sortOrder:q.sortOrder,minValue:q.minValue,maxValue:q.maxValue,options:{create:q.options.map(o=>({label:o.label,value:o.value,sortOrder:o.sortOrder}))}}))}})}}});
+ const copy = await db.survey.create({
+  data: {
+    title: `${source.title} (Copy)`,
+    slug,
+    eventName: source.eventName,
+    subtitle: source.subtitle,
+    description: source.description,
+    thankYou: source.thankYou,
+    privacyNotice: source.privacyNotice,
+    status: "DRAFT",
+    sections: {
+      create: source.sections.map((section) => ({
+        title: section.title,
+        description: section.description,
+        sortOrder: section.sortOrder,
+        questions: {
+          create: section.questions.map((question) => ({
+            title: question.title,
+            description: question.description,
+            type: question.type,
+            required: question.required,
+            enabled: question.enabled,
+            sortOrder: question.sortOrder,
+            minValue: question.minValue,
+            maxValue: question.maxValue,
+            options: {
+              create: question.options.map((option) => ({
+                label: option.label,
+                value: option.value,
+                sortOrder: option.sortOrder,
+              })),
+            },
+          })),
+        },
+      })),
+    },
+  },
+ });
  await writeAudit(admin.id,"survey.duplicate","Survey",copy.id,{sourceId:id});revalidatePath("/admin/surveys");redirect(`/admin/surveys/${copy.id}`);
 }
