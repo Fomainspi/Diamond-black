@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getPrismaClient } from "@/lib/prisma";
-import { createSurvey } from "./actions";
+import { createSurvey, createInitialEventSurvey } from "./actions";
 
 export default async function SurveysPage(){
  const db=getPrismaClient();
@@ -11,7 +11,7 @@ export default async function SurveysPage(){
  ]);
  return <><div className="admin-toolbar"><div><span className="eyebrow">Feedback intelligence</span><h1>Surveys &amp; Feedback</h1><p className="admin-muted">Create event surveys and understand guest experiences.</p></div></div>
  <div className="admin-grid">{[["Total surveys",total],["Published",active],["Drafts",drafts],["Responses",responses],["Last 7 days",recent]].map(([label,value])=><section className="admin-stat" key={label}><span className="admin-muted">{label}</span><strong>{value}</strong></section>)}</div>
- <section className="admin-panel"><h2>Create a survey</h2><form action={createSurvey} className="admin-form-grid">
+ <section className="admin-panel"><h2>First event survey</h2><p className="admin-muted">Create the complete 100 People One Night guest experience survey from the approved question set.</p><form action={createInitialEventSurvey}><button className="admin-button" type="submit">Create 100 People One Night survey</button></form></section><section className="admin-panel"><h2>Create a survey</h2><form action={createSurvey} className="admin-form-grid">
  <label>Survey title<input name="title" required maxLength={160} placeholder="100 People One Night – Guest Experience & Feedback Survey"/></label>
  <label>Public URL slug<input name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="100-people-one-night"/></label>
  <label>Event name<input name="eventName" required placeholder="100 People One Night"/></label>

@@ -108,3 +108,59 @@ export async function closeSurvey(formData: FormData) {
   revalidatePath("/admin/surveys");revalidatePath(`/survey/${survey.slug}`);
   redirect(`/admin/surveys/${id}`);
 }
+
+export async function createInitialEventSurvey() {
+ const admin=await getCurrentAdmin();if(!admin)redirect("/admin/login");
+ const db=getPrismaClient();const existing=await db.survey.findUnique({where:{slug:"100-people-one-night"}});
+ if(existing)redirect(`/admin/surveys/${existing.id}`);
+ const groups=[
+  {title:"SECTION 1 – YOUR EXPERIENCE",items:[
+   ["Overall, how would you rate your experience at 100 People One Night?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate the venue and environment?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate the event organization?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate the entertainment and program?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate the networking opportunities?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate hospitality and guest experience?","RATING",true,["1","2","3","4","5"]],
+   ["How would you rate the overall atmosphere?","RATING",true,["1","2","3","4","5"]],
+   ["What did you enjoy most about the event?","MULTIPLE_CHOICE",false,["Meeting new people","Networking and making connections","Entertainment and music","The atmosphere and environment","Cultural diversity","Overall organization","Other"]],
+   ["Did the event meet your expectations?","SINGLE_CHOICE",true,["Exceeded my expectations","Met my expectations","Partially met my expectations","Did not meet my expectations"]]
+  ]},
+  {title:"SECTION 2 – YOUR FEEDBACK",items:[
+   ["What was your most memorable moment or experience during the event?","LONG_TEXT",false,[]],
+   ["What do you think we could improve for our next event?","LONG_TEXT",false,[]],
+   ["Would you recommend a Diamond Black event to your friends, colleagues, or business partners?","SINGLE_CHOICE",true,["Definitely","Probably","Not sure","Probably not","Definitely not"]]
+  ]},
+  {title:"SECTION 3 – FUTURE OPPORTUNITIES",items:[
+   ["What types of events or activities would you like Diamond Black to organize in the future?","MULTIPLE_CHOICE",false,["Business networking events","Entrepreneurship and investment forums","Cultural events and celebrations","Music and entertainment events","Professional development and training","Business conferences and exhibitions","Social and community gatherings","Africa–Philippines international business networking","Other"]],
+   ["Would you be interested in participating in future Diamond Black initiatives?","SINGLE_CHOICE",true,["Yes, definitely","Yes, depending on the initiative","Maybe","Not at the moment"]],
+   ["In what capacity would you be interested in connecting with Diamond Black?","MULTIPLE_CHOICE",false,["Guest or community member","Entrepreneur or business owner","Potential business partner","Sponsor or investor","Professional or service provider","Volunteer or collaborator","Other"]]
+  ]},
+  {title:"SECTION 4 – YOUR MESSAGE",items:[
+   ["Do you have any additional comments, suggestions, or messages for the Diamond Black team?","LONG_TEXT",false,[]],
+   ["Would you like to receive updates about upcoming events, opportunities, and initiatives from Diamond Black Corporation?","YES_NO",false,[]]
+  ]}
+ ] as const;
+ const survey=await db.survey.create({data:{
+  title:"100 PEOPLE ONE NIGHT – GUEST EXPERIENCE & FEEDBACK SURVEY",slug:"100-people-one-night",eventName:"100 People One Night",
+  subtitle:"Your experience matters. Help us make the next event even better.",
+  description:"Thank you for being part of 100 People One Night! We are grateful that you joined us and contributed to making this event memorable. At Diamond Black Corporation, we believe that meaningful connections, shared experiences, and community engagement are essential to building something great. Your feedback matters. Please take a few minutes to share your experience and help us improve future events.",
+  thankYou:"Thank you for taking the time to share your experience. Your feedback will help Diamond Black Corporation create even more meaningful events and opportunities.",
+  privacyNotice:"Your responses are used by Diamond Black Corporation to evaluate and improve our events. Newsletter subscription is optional and requires your separate consent.",
+  sections:{create:groups.map((g,si)=>({title:g.title,sortOrder:si,questions:{create:g.items.map((q,qi)=>({title:q[0],type:q[1] as never,required:q[2],sortOrder:qi,options:{create:q[3].map((label,oi)=>({label,value:label,sortOrder:oi}))}}))}})}
+ }});
+ await writeAudit(admin.id,"survey.create.initial","Survey",survey.id);revalidatePath("/admin/surveys");redirect(`/admin/surveys/${survey.id}`);
+}
+export async function archiveSurvey(formData:FormData){
+ const admin=await getCurrentAdmin();if(!admin)redirect("/admin/login");
+ const id=String(formData.get("surveyId")??"");const survey=await getPrismaClient().survey.update({where:{id},data:{status:"ARCHIVED"}});
+ await writeAudit(admin.id,"survey.archive","Survey",id);revalidatePath("/admin/surveys");revalidatePath(`/survey/${survey.slug}`);redirect("/admin/surveys");
+}
+export async function duplicateSurvey(formData:FormData){
+ const admin=await getCurrentAdmin();if(!admin)redirect("/admin/login");
+ const id=String(formData.get("surveyId")??"");const db=getPrismaClient();
+ const source=await db.survey.findUnique({where:{id},include:{sections:{orderBy:{sortOrder:"asc"},include:{questions:{orderBy:{sortOrder:"asc"},include:{options:{orderBy:{sortOrder:"asc"}}}}}}}});
+ if(!source)redirect("/admin/surveys");
+ const slug=`${source.slug}-copy-${Date.now().toString().slice(-6)}`;
+ const copy=await db.survey.create({data:{title:`${source.title} (Copy)`,slug,eventName:source.eventName,subtitle:source.subtitle,description:source.description,thankYou:source.thankYou,privacyNotice:source.privacyNotice,status:"DRAFT",sections:{create:source.sections.map(s=>({title:s.title,description:s.description,sortOrder:s.sortOrder,questions:{create:s.questions.map(q=>({title:q.title,description:q.description,type:q.type,required:q.required,enabled:q.enabled,sortOrder:q.sortOrder,minValue:q.minValue,maxValue:q.maxValue,options:{create:q.options.map(o=>({label:o.label,value:o.value,sortOrder:o.sortOrder}))}}))}})}}});
+ await writeAudit(admin.id,"survey.duplicate","Survey",copy.id,{sourceId:id});revalidatePath("/admin/surveys");redirect(`/admin/surveys/${copy.id}`);
+}

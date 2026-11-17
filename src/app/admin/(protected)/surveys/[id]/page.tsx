@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPrismaClient } from "@/lib/prisma";
-import { addQuestion, closeSurvey, deleteQuestion, publishSurvey, updateQuestion } from "../actions";
+import { addQuestion, closeSurvey, publishSurvey, updateQuestion, duplicateSurvey, archiveSurvey, deleteQuestion } from "../actions";
 
 export default async function SurveyEditor({params}:{params:Promise<{id:string}>}){
  const {id}=await params;const survey=await getPrismaClient().survey.findUnique({where:{id},include:{sections:{orderBy:{sortOrder:"asc"},include:{questions:{orderBy:{sortOrder:"asc"},include:{options:{orderBy:{sortOrder:"asc"}}}}}},_count:{select:{responses:true}}}});
@@ -13,7 +13,7 @@ export default async function SurveyEditor({params}:{params:Promise<{id:string}>
  <label>Question<input name="title" defaultValue={q.title} required maxLength={500}/></label>
  <label className="admin-check"><input type="checkbox" name="required" defaultChecked={q.required}/> Required</label>
  <label>Answer options (one per line)<textarea name="options" rows={3} defaultValue={q.options.map(o=>o.label).join("\n")}/></label>
- <p className="admin-muted">Type: {q.type}</p><button className="admin-button" type="submit">Save question</button>
+ <p className="admin-muted">Type: {q.type}</p><button className="admin-button" type="submit">Save question</button></form><form action={deleteQuestion}><input type="hidden" name="surveyId" value={survey.id}/><input type="hidden" name="questionId" value={q.id}/><button className="admin-danger" type="submit">Delete question</button>
  </form>)}</div>)}
  {section&&<form action={addQuestion} className="admin-form-grid"><input type="hidden" name="surveyId" value={survey.id}/><input type="hidden" name="sectionId" value={section.id}/><h3 className="admin-wide">Add a question</h3>
  <label className="admin-wide">Question text<input name="title" required maxLength={500}/></label>
@@ -21,7 +21,7 @@ export default async function SurveyEditor({params}:{params:Promise<{id:string}>
  <label>Answer options (one per line)<textarea name="options" rows={3} placeholder={"Option one\nOption two"}/></label>
  <label className="admin-check"><input type="checkbox" name="required"/> Required</label><div><button className="admin-button" type="submit">Add question</button></div></form>}
  </section>
- <section className="admin-panel"><h2>Publication</h2><p className="admin-muted">Every publication captures the current question set as a version. Previously submitted responses remain attached to their original version.</p><p><Link className="admin-link" href={`/survey/${survey.slug}`} target="_blank">Open public survey ↗</Link></p>
+ <section className="admin-panel"><h2>Survey actions</h2><form action={duplicateSurvey} className="admin-inline-form"><input type="hidden" name="surveyId" value={survey.id}/><button className="admin-button admin-button-secondary" type="submit">Duplicate survey</button></form><form action={archiveSurvey} className="admin-inline-form"><input type="hidden" name="surveyId" value={survey.id}/><button className="admin-danger" type="submit">Archive survey</button></form></section><section className="admin-panel"><h2>Publication</h2><p className="admin-muted">Every publication captures the current question set as a version. Previously submitted responses remain attached to their original version.</p><p><Link className="admin-link" href={`/survey/${survey.slug}`} target="_blank">Open public survey ↗</Link></p>
  <form action={publishSurvey}><input type="hidden" name="surveyId" value={survey.id}/><button className="admin-button" type="submit">Publish new version</button></form>
  {survey.status==="PUBLISHED"&&<form action={closeSurvey} className="admin-inline-form"><input type="hidden" name="surveyId" value={survey.id}/><button className="admin-button admin-button-secondary" type="submit">Close survey</button></form>}
  </section>
