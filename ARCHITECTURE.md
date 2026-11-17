@@ -121,3 +121,7 @@ Keep `.env` and secrets out of Git. Never commit database dumps, production regi
 
 ## Non-goals for the first release
 Public user accounts, member profiles, social networking, public messaging, Kubernetes, microservices, a load balancer or a separate managed database without a documented need and budget approval.
+
+
+## Survey & Feedback System (feature branch in progress)
+The survey feature uses the existing PostgreSQL/Prisma database and CMS administrator session. Its additive schema introduces reusable surveys, sections, configurable questions/options, immutable publication snapshots, responses and per-response answer records. Each response references the exact published survey version so later edits do not reinterpret historical answers. Public survey pages must only query PUBLISHED surveys; response and analytics routes must validate access and rate-limit public submissions. Newsletter consent is captured separately from survey completion and is sent through the existing newsletter endpoint only after explicit opt-in.
