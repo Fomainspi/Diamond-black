@@ -13,7 +13,7 @@ export default async function PublicSurveyPage({params}:{params:Promise<{slug:st
  const version=survey?.versions[0];if(!survey||!version)notFound();
  const snapshot=version.snapshot as unknown as Snapshot;
  return <main className="survey-page"><div className="survey-card">
-  <header className="survey-header"><Link href="/" aria-label="Diamond Black Corporation home"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></a>
+  <header className="survey-header"><Link href="/" aria-label="Diamond Black Corporation home"><img src="/images/diamond-black-horizontal.jpg" alt="Diamond Black Corporation"/></Link>
    <span className="eyebrow">Diamond Black Corporation</span><h1>{snapshot.title}</h1>{snapshot.subtitle&&<p className="survey-subtitle">{snapshot.subtitle}</p>}
    <p className="survey-intro">{snapshot.description}</p><span className="survey-event">{snapshot.eventName}</span>
   </header>
