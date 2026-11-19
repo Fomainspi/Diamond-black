@@ -12,6 +12,8 @@ const nextConfig:NextConfig={
  outputFileTracingIncludes:{
   "/api/events/register":["./src/generated/prisma/**/*","./node_modules/@prisma/**/*","./node_modules/pg/**/*"],
   "/api/admin/registrations/export":["./src/generated/prisma/**/*","./node_modules/@prisma/**/*","./node_modules/pg/**/*"],
+  "/api/survey/submit":["./src/generated/prisma/**/*","./node_modules/@prisma/**/*","./node_modules/pg/**/*"],
+  "/api/admin/surveys/[id]/export":["./src/generated/prisma/**/*","./node_modules/@prisma/**/*","./node_modules/pg/**/*"],
  },
  async headers(){return [{source:"/(.*)",headers:securityHeaders}];},
 };
